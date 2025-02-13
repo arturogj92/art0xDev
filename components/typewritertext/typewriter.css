@@ -1,0 +1,36 @@
+/* Ajusta estos valores (38, 3s) según la longitud real de tu texto y la velocidad deseada. */
+
+.typewriter {
+    display: inline-block;        /* Importante para usar width + overflow */
+    overflow: hidden;             /* Oculta el texto que aún no se ha “escrito” */
+    white-space: nowrap;          /* No hace saltos de línea */
+    width: 41ch;                  /* 38 = nº de caracteres de la frase */
+    animation: typing 3s steps(41, end) 1; /* Se “escribe” en 3s, 38 pasos */
+    position: relative;           /* Para que el ::after se posicione relativo al final del texto */
+    font-family: "Courier New", Courier, monospace;
+}
+
+/* Pseudo-elemento que actúa como cursor, siempre pegado al final */
+.typewriter::after {
+    content: "|";                 /* El símbolo del cursor */
+    position: absolute;
+    /*right: 0ch;                     !* Lo fija al borde derecho del contenedor, que crece con el texto *!*/
+    animation: blink-caret 1s step-end infinite;
+}
+
+/* ANIMACIÓN DE ESCRITURA */
+@keyframes typing {
+    from {
+        width: 0;
+    }
+    to {
+        width: 40ch;
+    }
+}
+
+/* ANIMACIÓN DE PARPADEO */
+@keyframes blink-caret {
+    50% {
+        opacity: 0;
+    }
+}
