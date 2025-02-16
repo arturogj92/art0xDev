@@ -20,47 +20,50 @@ import {
 import { LinkData, SectionData } from "./types";
 import MultiSectionsContainer from "./multi-sections-container";
 
+/**
+ * Reordena enlaces con drag & drop, y secciones con flechas (dentro del contenedor).
+ * - links, setLinks => para actualizar enlaces
+ * - sections, setSections => para actualizar secciones
+ */
 interface MultiSectionsBoardProps {
     links: LinkData[];
-    setLinks: (val: LinkData[]) => void;
+    setLinks: React.Dispatch<React.SetStateAction<LinkData[]>>;
     sections: SectionData[];
+    setSections: React.Dispatch<React.SetStateAction<SectionData[]>>;
 }
 
 export default function MultiSectionsBoard({
                                                links,
                                                setLinks,
                                                sections,
+                                               setSections,
                                            }: MultiSectionsBoardProps) {
     const [containers, setContainers] = useState<{ id: string; items: string[] }[]>([]);
-    const [activeId, setActiveId] = useState<string | null>(null); // para overlay
+    const [activeId, setActiveId] = useState<string | null>(null);
 
     useEffect(() => {
-        // Construir contenedores
+        // 1. "no-section"
         const noSectionItems = links
             .filter((l) => !l.pinned && !l.section_id)
             .sort((a, b) => a.position - b.position)
             .map((l) => l.id);
 
-        const newContainers = [
-            {
-                id: "no-section",
-                items: noSectionItems,
-            },
-            ...sections
-                .sort((a, b) => a.position - b.position)
-                .map((sec) => {
-                    const secItems = links
-                        .filter((l) => !l.pinned && l.section_id === sec.id)
-                        .sort((a, b) => a.position - b.position)
-                        .map((l) => l.id);
-                    return {
-                        id: sec.id,
-                        items: secItems,
-                    };
-                }),
-        ];
+        // 2. Secciones reales
+        const sectionContainers = sections
+            .sort((a, b) => a.position - b.position)
+            .map((sec) => {
+                const secItems = links
+                    .filter((l) => !l.pinned && l.section_id === sec.id)
+                    .sort((a, b) => a.position - b.position)
+                    .map((l) => l.id);
 
-        setContainers(newContainers);
+                return { id: sec.id, items: secItems };
+            });
+
+        setContainers([
+            { id: "no-section", items: noSectionItems },
+            ...sectionContainers,
+        ]);
     }, [links, sections]);
 
     const sensors = useSensors(
@@ -68,23 +71,22 @@ export default function MultiSectionsBoard({
         useSensor(KeyboardSensor)
     );
 
-    // Manejamos dragStart y dragEnd
+    // ========== DRAG & DROP PARA ENLACES ==========
     function handleDragStart(event: DragStartEvent) {
-        // guardamos el activeId en el estado
-        const { active } = event;
-        setActiveId(active.id as string);
+        setActiveId(event.active.id as string);
     }
 
     function handleDragEnd(event: DragEndEvent) {
         const { active, over } = event;
-        setActiveId(null); // limpiamos overlay
-
+        setActiveId(null);
         if (!over) return;
 
-        const activeContainer = containers.find((c) => c.items.includes(active.id));
+        const activeContainer = containers.find((c) =>
+            c.items.includes(active.id as string)
+        );
         const overContainer =
-            containers.find((c) => c.items.includes(over.id)) ||
-            containers.find((c) => c.id === over.id);
+            containers.find((c) => c.items.includes(over.id as string)) ||
+            containers.find((c) => c.id === (over.id as string));
 
         if (!activeContainer || !overContainer) return;
         if (activeContainer.id === overContainer.id && active.id === over.id) {
@@ -99,33 +101,32 @@ export default function MultiSectionsBoard({
         const fromItems = newContainers[fromIndex].items;
         const toItems = newContainers[toIndex].items;
 
-        const oldIndex = fromItems.indexOf(active.id);
-        let newIndex = toItems.indexOf(over.id);
+        const oldIndex = fromItems.indexOf(active.id as string);
+        let newIndex = toItems.indexOf(over.id as string);
         if (newIndex === -1) {
             newIndex = toItems.length;
         }
 
         if (activeContainer.id === overContainer.id) {
-            // Mover dentro de la misma sección
+            // Reordenar enlaces en la misma sección
             const reordered = arrayMove(fromItems, oldIndex, newIndex);
             newContainers[fromIndex].items = reordered;
-
-            reorderLinksInContainer(reordered, activeContainer.id);
-
+            reorderLinksInContainer(reordered);
         } else {
-            // Mover a otro contenedor
+            // Mover enlace a otra sección
             fromItems.splice(oldIndex, 1);
-            toItems.splice(newIndex, 0, active.id);
+            toItems.splice(newIndex, 0, active.id as string);
 
-            updateLinkContainer(active.id, overContainer.id);
+            updateLinkContainer(active.id as string, overContainer.id);
 
-            reorderLinksInContainer(toItems, overContainer.id);
-            reorderLinksInContainer(fromItems, activeContainer.id);
+            reorderLinksInContainer(toItems);
+            reorderLinksInContainer(fromItems);
         }
 
         setContainers(newContainers);
     }
 
+    // Actualiza section_id => PATCH
     async function updateLinkContainer(linkId: string, containerId: string) {
         const section_id = containerId === "no-section" ? null : containerId;
         setLinks((prev) => {
@@ -144,7 +145,8 @@ export default function MultiSectionsBoard({
         });
     }
 
-    async function reorderLinksInContainer(itemIds: string[], containerId: string) {
+    // Reasigna position => PATCH
+    async function reorderLinksInContainer(itemIds: string[]) {
         setLinks((prev) => {
             const newLinks = structuredClone(prev);
             itemIds.forEach((id, idx) => {
@@ -164,7 +166,53 @@ export default function MultiSectionsBoard({
         });
     }
 
-    // Para renderizar en overlay
+    // ========== REORDENAR SECCIONES CON FLECHAS (dentro del contenedor) ==========
+    // Llamado por multi-sections-container
+    function moveSectionUp(sectionId: string) {
+        setSections((prev) => {
+            const idx = prev.findIndex((s) => s.id === sectionId);
+            if (idx <= 0) return prev;
+            const newArr = [...prev];
+            [newArr[idx], newArr[idx - 1]] = [newArr[idx - 1], newArr[idx]];
+            newArr.forEach((sec, i) => {
+                sec.position = i;
+            });
+            patchSections(newArr);
+            return newArr;
+        });
+    }
+
+    function moveSectionDown(sectionId: string) {
+        setSections((prev) => {
+            const idx = prev.findIndex((s) => s.id === sectionId);
+            if (idx < 0 || idx >= prev.length - 1) return prev;
+            const newArr = [...prev];
+            [newArr[idx], newArr[idx + 1]] = [newArr[idx + 1], newArr[idx]];
+            newArr.forEach((sec, i) => {
+                sec.position = i;
+            });
+            patchSections(newArr);
+            return newArr;
+        });
+    }
+
+    async function patchSections(finalArr: SectionData[]) {
+        try {
+            const body = finalArr.map((sec) => ({
+                id: sec.id,
+                position: sec.position,
+            }));
+            await fetch("/api/sections", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body),
+            });
+        } catch (error) {
+            console.error("Error patching sections:", error);
+        }
+    }
+
+    // Drag Overlay => ver si arrastramos un enlace
     const activeLink = activeId ? links.find((l) => l.id === activeId) : null;
 
     return (
@@ -174,7 +222,13 @@ export default function MultiSectionsBoard({
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
         >
-            <SortableContext items={containers.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+            {/* SortableContext => contenedores para secciones,
+          pero NO reordenamos contenedores con drag,
+          sino que se mantiene la disposición. */}
+            <SortableContext
+                items={containers.map((c) => c.id)}
+                strategy={verticalListSortingStrategy}
+            >
                 <div className="flex flex-col gap-6">
                     {containers.map((container) => (
                         <MultiSectionsContainer
@@ -183,17 +237,16 @@ export default function MultiSectionsBoard({
                             items={container.items}
                             links={links}
                             sections={sections}
+                            moveSectionUp={moveSectionUp}    // <-- flechas
+                            moveSectionDown={moveSectionDown} // <-- flechas
                         />
                     ))}
                 </div>
             </SortableContext>
 
-            {/* DRAG OVERLAY */}
             <DragOverlay>
                 {activeLink ? (
-                    // Reutilizamos el mismo item con su estilo
                     <div className="cursor-grab text-sm text-gray-300 bg-gray-700 rounded px-2 p-2">
-                        {/* O tu MultiSectionsItem, con un style de overlay */}
                         <div className="font-semibold">{activeLink.title}</div>
                         <div className="text-xs text-gray-400">{activeLink.url}</div>
                     </div>

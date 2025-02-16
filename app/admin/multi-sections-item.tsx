@@ -10,19 +10,14 @@ interface MultiSectionsItemProps {
 
 export default function MultiSectionsItem({ link }: MultiSectionsItemProps) {
     const {
-        // `setNodeRef`: referencia para el contenedor general
         setNodeRef,
-        // `setActivatorNodeRef`: referencia para el "handle"
         setActivatorNodeRef,
         attributes,
         listeners,
         transform,
         transition,
         isDragging,
-    } = useSortable({
-        id: link.id,
-        // handle: true // (opcional) si deseas forzar la lógica de "handle"
-    });
+    } = useSortable({ id: link.id });
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -31,9 +26,12 @@ export default function MultiSectionsItem({ link }: MultiSectionsItemProps) {
     };
 
     return (
-        <li ref={setNodeRef} style={style} className="flex items-center gap-2 p-2 border rounded bg-white/10">
-            {/* Aquí el "icono" que sirve de handle.
-          Ponemos ref={setActivatorNodeRef} + {...attributes} + {...listeners}. */}
+        <li
+            ref={setNodeRef}
+            style={style}
+            className="flex items-center gap-2 p-2 border rounded bg-white/10"
+        >
+            {/* Icono handle */}
                 <div
                     ref={setActivatorNodeRef}
                     {...attributes}
@@ -45,7 +43,6 @@ export default function MultiSectionsItem({ link }: MultiSectionsItemProps) {
                     ☰
                 </div>
 
-            {/* Resto del contenido, sin events de drag */}
                 <div>
                     <div className="font-semibold">{link.title}</div>
                     <div className="text-xs text-gray-400">{link.url}</div>

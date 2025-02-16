@@ -3,11 +3,13 @@
 import { useEffect, useState } from "react";
 import { LinkData, SectionData } from "./types";
 import { CreationForm } from "./creation-form";
-import SectionsPanel from "./sections-panel"; // Ajusta ruta
-import MultiSectionsBoard from "./multi-sections-board"; // Ajusta ruta
+import MultiSectionsBoard from "./multi-sections-board";
 
 export default function AdminPage() {
     const [links, setLinks] = useState<LinkData[]>([]);
+    const [sections, setSections] = useState<SectionData[]>([]);
+
+    // Estado para crear link
     const [newLink, setNewLink] = useState<Omit<LinkData, "id">>({
         title: "",
         url: "",
@@ -18,17 +20,7 @@ export default function AdminPage() {
         section_id: null,
     });
 
-    // Edición inline
-    const [editingLinkId, setEditingLinkId] = useState<string | null>(null);
-    const [editingTitle, setEditingTitle] = useState("");
-    const [editingUrl, setEditingUrl] = useState("");
-
-    // =======================
-    // ESTADO DE SECCIONES
-    // =======================
-    const [sections, setSections] = useState<SectionData[]>([]);
-
-    // Cargar links y sections
+    // Carga inicial
     useEffect(() => {
         // Cargar links
         fetch("/api/links")
@@ -51,10 +43,8 @@ export default function AdminPage() {
             .catch((err) => console.error(err));
     }, []);
 
-    // =======================
-    // FUNCIONES LINKS
-    // =======================
-    const handleCreate = async () => {
+    // ========== CREAR LINK ==========
+    async function handleCreate() {
         try {
             const res = await fetch("/api/links", {
                 method: "POST",
@@ -80,95 +70,56 @@ export default function AdminPage() {
         } catch (error) {
             console.error(error);
         }
-    };
+    }
 
-    const handleDelete = async (id: string) => {
+    // ========== REORDENAR SECCIONES CON FLECHAS ==========
+    function moveSectionUp(sectionId: string) {
+        setSections((prev) => {
+            const idx = prev.findIndex((s) => s.id === sectionId);
+            if (idx <= 0) return prev; // no sube si está arriba del todo
+
+            const newArr = [...prev];
+            [newArr[idx], newArr[idx - 1]] = [newArr[idx - 1], newArr[idx]];
+            // reasignar position
+            newArr.forEach((sec, i) => {
+                sec.position = i;
+            });
+            patchSections(newArr);
+            return newArr;
+        });
+    }
+
+    function moveSectionDown(sectionId: string) {
+        setSections((prev) => {
+            const idx = prev.findIndex((s) => s.id === sectionId);
+            if (idx < 0 || idx >= prev.length - 1) return prev; // no baja si está al final
+
+            const newArr = [...prev];
+            [newArr[idx], newArr[idx + 1]] = [newArr[idx + 1], newArr[idx]];
+            newArr.forEach((sec, i) => {
+                sec.position = i;
+            });
+            patchSections(newArr);
+            return newArr;
+        });
+    }
+
+    async function patchSections(finalArr: SectionData[]) {
         try {
-            const res = await fetch(`/api/links?id=${id}`, { method: "DELETE" });
-            const data = await res.json();
-
-            if (res.ok) {
-                setLinks((prev) => prev.filter((l) => l.id !== id));
-            } else {
-                console.error("Error al eliminar link:", data.error);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const handleUpdateLink = async (id: string, updates: Partial<LinkData>) => {
-        try {
-            const res = await fetch("/api/links", {
+            const body = finalArr.map((s) => ({
+                id: s.id,
+                position: s.position,
+            }));
+            await fetch("/api/sections", {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id, ...updates }),
-            });
-            const data = await res.json();
-
-            if (res.ok) {
-                setLinks((prev) =>
-                    prev.map((link) => (link.id === id ? { ...link, ...data } : link))
-                );
-            } else {
-                console.error("Error al actualizar link:", data.error);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    // Edición inline
-    const startEditing = (link: LinkData) => {
-        setEditingLinkId(link.id);
-        setEditingTitle(link.title);
-        setEditingUrl(link.url);
-    };
-
-    const saveEditing = async (id: string) => {
-        await handleUpdateLink(id, { title: editingTitle, url: editingUrl });
-        setEditingLinkId(null);
-        setEditingTitle("");
-        setEditingUrl("");
-    };
-
-    const cancelEditing = () => {
-        setEditingLinkId(null);
-        setEditingTitle("");
-        setEditingUrl("");
-    };
-
-    // Reordenar no pinned
-    const handleReorder = async (newLinks: LinkData[]) => {
-        // pinned primero
-        const pinned = links.filter((l) => l.pinned).sort((a, b) => a.position - b.position);
-        const combined = [...pinned, ...newLinks];
-        setLinks(combined);
-
-        const updates = newLinks.map((l) => ({ id: l.id, position: l.position }));
-        try {
-            await fetch("/api/links", {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(updates),
+                body: JSON.stringify(body),
             });
         } catch (error) {
-            console.error(error);
+            console.error("Error patching sections:", error);
         }
-    };
+    }
 
-    // Separar pinned / normal
-    const pinnedLinks = links
-        .filter((l) => l.pinned)
-        .sort((a, b) => a.position - b.position);
-
-    const normalLinks = links
-        .filter((l) => !l.pinned)
-        .sort((a, b) => a.position - b.position);
-
-    // =======================
-    // RENDER
-    // =======================
     return (
         <div className="p-4">
             <h1 className="text-2xl font-bold mb-4">Panel de Administración (Editables)</h1>
@@ -178,48 +129,16 @@ export default function AdminPage() {
                 newLink={newLink}
                 setNewLink={setNewLink}
                 onCreate={handleCreate}
-                sections={sections} // <-- Para asignar section_id si deseas
+                sections={sections}
             />
 
-            {/* Lista de enlaces pinned */}
-            {/*<PinnedList*/}
-            {/*    pinnedLinks={pinnedLinks}*/}
-            {/*    editingLinkId={editingLinkId}*/}
-            {/*    editingTitle={editingTitle}*/}
-            {/*    editingUrl={editingUrl}*/}
-            {/*    setEditingTitle={setEditingTitle}*/}
-            {/*    setEditingUrl={setEditingUrl}*/}
-            {/*    onStartEditing={startEditing}*/}
-            {/*    onSaveEditing={saveEditing}*/}
-            {/*    onCancelEditing={cancelEditing}*/}
-            {/*    onDelete={handleDelete}*/}
-            {/*    onUpdateLink={handleUpdateLink}*/}
-            {/*/>*/}
-
-            {/* Lista de enlaces no pinned */}
-            {/*<NonPinnedList*/}
-            {/*    normalLinks={normalLinks}*/}
-            {/*    editingLinkId={editingLinkId}*/}
-            {/*    editingTitle={editingTitle}*/}
-            {/*    editingUrl={editingUrl}*/}
-            {/*    setEditingTitle={setEditingTitle}*/}
-            {/*    setEditingUrl={setEditingUrl}*/}
-            {/*    onStartEditing={startEditing}*/}
-            {/*    onSaveEditing={saveEditing}*/}
-            {/*    onCancelEditing={cancelEditing}*/}
-            {/*    onDelete={handleDelete}*/}
-            {/*    onUpdateLink={handleUpdateLink}*/}
-            {/*    onReorder={handleReorder}*/}
-            {/*/>*/}
-            {/* Board para NO pinned, distribuidos en contenedores (no-section + secciones) */}
+            {/* Board para reordenar enlaces (drag & drop) */}
             <MultiSectionsBoard
                 links={links}
                 setLinks={setLinks}
                 sections={sections}
+                setSections={setSections}
             />
-
-            {/* Panel para reordenar secciones (título, etc.) */}
-            <SectionsPanel />
 
         </div>
     );
