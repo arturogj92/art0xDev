@@ -1,36 +1,105 @@
+// app/page.tsx
 import Header from "@/components/header";
-import SocialLinks from "@/components/SocialLinks";
 import Section from "@/components/section";
 import LinkButton from "@/components/link-button";
+import SocialLinks from "@/components/SocialLinks";
+import { supabaseAdmin } from "@/lib/supabase"; // Ajusta la ruta si tu archivo se llama distinto
 
-export default function Home() {
-  return (
-      <div className="min-h-screen bg-gradient-to-b from-black to-fuchsia-950 p-4">
-        {/* Encabezado con tu perfil */}
-        <Header
-            name="Art0xDev"
-            role="Full Stack Dev"
-            description="¡Aprende programación desde 0 conmigo!"
-            profileImage="https://cdn.campsite.bio/eyJidWNrZXQiOiJjYW1wc2l0ZS1iaW8tc3RvcmFnZSIsImtleSI6Im1lZGlhL3Byb2ZpbGUtaW1hZ2VzLzcyM2Q3MjU2LTU5MTMtNDA4Zi1hZTNiLTUyZDU2NDJhZDc4OC5qcGVnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjoyMDB9fX0="  // Asegúrate de poner la ruta correcta a tu imagen
-        />
+export default async function Home() {
+    // 1. Cargar secciones
+    const { data: sectionsData, error: secError } = await supabaseAdmin
+        .from("sections")
+        .select("*")
+        .order("position", { ascending: true });
 
-        {/* Sección de Promociones y Colaboraciones */}
-        <Section title="Promociones y Colaboraciones">
-          <LinkButton iconUrl="https://cdn.campsite.bio/eyJidWNrZXQiOiJjYW1wc2l0ZS1iaW8tc3RvcmFnZSIsImtleSI6Im1lZGlhL3lSa2F0RWxVSHdSeFVMZzZZNmNTeFV4dm9QQncyM2pTYlRSWEZhYTRtRGsuanBlZyIsImVkaXRzIjp7InJlc2l6ZSI6eyJ3aWR0aCI6MTUwfX19" title="Conviértete en desarrollador en tan sólo 18 semanas con 4geeks Academy" url="https://curso-java.com" />
-          <LinkButton iconUrl="https://cdn.campsite.bio/eyJidWNrZXQiOiJjYW1wc2l0ZS1iaW8tc3RvcmFnZSIsImtleSI6Im1lZGlhL3lSa2F0RWxVSHdSeFVMZzZZNmNTeFV4dm9QQncyM2pTYlRSWEZhYTRtRGsuanBlZyIsImVkaXRzIjp7InJlc2l6ZSI6eyJ3aWR0aCI6MTUwfX19" title="Conviértete en desarrollador en tan sólo 18 semanas con 4geeks Academy" url="https://curso-java.com" />
-        </Section>
+    // 2. Cargar enlaces
+    const { data: linksData, error: linksError } = await supabaseAdmin
+        .from("links")
+        .select("*")
+        .order("pinned", { ascending: false }) // primero los pinned
+        .order("position", { ascending: true }); // luego ordena por posición
 
-        {/* Sección de Cursos Gratis */}
-        <Section title="Mis Cursos Gratis">
-          <LinkButton iconUrl="https://cdn.campsite.bio/eyJidWNrZXQiOiJjYW1wc2l0ZS1iaW8tc3RvcmFnZSIsImtleSI6Im1lZGlhL3lSa2F0RWxVSHdSeFVMZzZZNmNTeFV4dm9QQncyM2pTYlRSWEZhYTRtRGsuanBlZyIsImVkaXRzIjp7InJlc2l6ZSI6eyJ3aWR0aCI6MTUwfX19" title="Conviértete en desarrollador en tan sólo 18 semanas con 4geeks Academy" url="https://curso-java.com" />
-        </Section>
+    // Manejo de errores
+    if (secError) {
+        console.error("Error fetching sections:", secError.message);
+    }
+    if (linksError) {
+        console.error("Error fetching links:", linksError.message);
+    }
 
-        {/* Sección de Extensiones y Herramientas Útiles */}
-        <Section title="Extensiones y Herramientas Útiles">
-            <LinkButton iconUrl="https://cdn.campsite.bio/eyJidWNrZXQiOiJjYW1wc2l0ZS1iaW8tc3RvcmFnZSIsImtleSI6Im1lZGlhL3lSa2F0RWxVSHdSeFVMZzZZNmNTeFV4dm9QQncyM2pTYlRSWEZhYTRtRGsuanBlZyIsImVkaXRzIjp7InJlc2l6ZSI6eyJ3aWR0aCI6MTUwfX19" title="Conviértete en desarrollador en tan sólo 18 semanas con 4geeks Academy" url="https://curso-java.com" />
-        </Section>
-        <SocialLinks />
-        {/*<ModeToggle/>*/}
-      </div>
-  );
+    const sections = sectionsData || [];
+    const links = linksData || [];
+
+    // Filtrar enlaces pinned y visibles
+    const pinnedLinks = links.filter((l) => l.pinned && l.visible);
+
+    // Filtrar enlaces sin sección (ni pinned), y visibles
+    const noSectionLinks = links.filter(
+        (l) => !l.pinned && !l.section_id && l.visible
+    );
+
+    return (
+        <div className="min-h-screen bg-gradient-to-b from-black to-fuchsia-950 p-4">
+            <Header
+                name="Art0xDev"
+                role="Full Stack Dev"
+                description="¡Aprende programación desde 0 conmigo!"
+                profileImage="http://localhost:3000/_next/image?url=https%3A%2F%2Fcdn.campsite.bio%2FeyJidWNrZXQiOiJjYW1wc2l0ZS1iaW8tc3RvcmFnZSIsImtleSI6Im1lZGlhL3Byb2ZpbGUtaW1hZ2VzLzcyM2Q3MjU2LTU5MTMtNDA4Zi1hZTNiLTUyZDU2NDJhZDc4OC5qcGVnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjoyMDB9fX0%3D&w=3840&q=75" // Ajusta la ruta de tu imagen
+            />
+
+            {/* SECCIÓN: Enlaces Pinned / Destacados */}
+            {pinnedLinks.length > 0 && (
+                <Section title="Destacados">
+                    {pinnedLinks.map((link) => (
+                        <LinkButton
+                            key={link.id}
+                            iconUrl={link.image || ""}
+                            title={link.title}
+                            url={link.url}
+                        />
+                    ))}
+                </Section>
+            )}
+
+            {/* SECCIÓN: Enlaces sin sección */}
+            {noSectionLinks.length > 0 && (
+                <Section title="Otros Enlaces">
+                    {noSectionLinks.map((link) => (
+                        <LinkButton
+                            key={link.id}
+                            iconUrl={link.image || ""}
+                            title={link.title}
+                            url={link.url}
+                        />
+                    ))}
+                </Section>
+            )}
+
+            {/* SECCIONES: cada sección con sus enlaces */}
+            {sections.map((sec) => {
+                // Filtrar los enlaces de esta sección
+                const secLinks = links.filter(
+                    (l) => l.section_id === sec.id && !l.pinned && l.visible
+                );
+
+                // Si no hay enlaces en la sección, podrías omitirla o mostrarla vacía
+                if (secLinks.length === 0) return null;
+
+                return (
+                    <Section key={sec.id} title={sec.title}>
+                        {secLinks.map((link) => (
+                            <LinkButton
+                                key={link.id}
+                                iconUrl={link.image || ""}
+                                title={link.title}
+                                url={link.url}
+                            />
+                        ))}
+                    </Section>
+                );
+            })}
+
+            <SocialLinks />
+        </div>
+    );
 }
