@@ -25,6 +25,7 @@ interface MultiSectionsBoardProps {
     setLinks: React.Dispatch<React.SetStateAction<LinkData[]>>;
     sections: SectionData[];
     setSections: React.Dispatch<React.SetStateAction<SectionData[]>>;
+    onUpdateLink: (id: string, updates: Partial<LinkData>) => void; // <-- NUEVO PROP
 }
 
 export default function MultiSectionsBoard({
@@ -32,6 +33,7 @@ export default function MultiSectionsBoard({
                                                setLinks,
                                                sections,
                                                setSections,
+                                               onUpdateLink,
                                            }: MultiSectionsBoardProps) {
     const [containers, setContainers] = useState<{ id: string; items: string[] }[]>([]);
     const [activeId, setActiveId] = useState<string | null>(null);
@@ -223,6 +225,7 @@ export default function MultiSectionsBoard({
                             moveSectionDown={moveSectionDown}
                             idx={idx}
                             total={containers.length}
+                            onUpdateLink={onUpdateLink}
                         />
                     ))}
                 </div>

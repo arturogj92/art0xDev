@@ -43,6 +43,7 @@ interface MultiSectionsContainerProps {
     moveSectionDown: (sectionId: string) => void;
     idx: number;  // índice en el array
     total: number; // total de contenedores
+    onUpdateLink: (id: string, updates: Partial<LinkData>) => void;
 }
 
 export default function MultiSectionsContainer({
@@ -54,6 +55,7 @@ export default function MultiSectionsContainer({
                                                    moveSectionDown,
                                                    idx,
                                                    total,
+                                                   onUpdateLink,
                                                }: MultiSectionsContainerProps) {
     // droppable => permitir soltar enlaces
     const { setNodeRef } = useDroppable({ id: containerId });
@@ -108,7 +110,7 @@ export default function MultiSectionsContainer({
                 <ul className="space-y-2">
                     {linkObjects.map((link) => {
                         if (!link) return null;
-                        return <MultiSectionsItem key={link.id} link={link} />;
+                        return <MultiSectionsItem key={link.id} link={link} onUpdateLink={onUpdateLink} />;
                     })}
                 </ul>
             </SortableContext>

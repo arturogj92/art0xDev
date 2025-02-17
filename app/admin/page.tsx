@@ -44,6 +44,27 @@ export default function AdminPage() {
             .catch((err) => console.error(err));
     }, []);
 
+
+    async function handleUpdateLink(id: string, updates: Partial<LinkData>) {
+        try {
+            const res = await fetch("/api/links", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id, ...updates }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setLinks((prev) =>
+                    prev.map((link) => (link.id === id ? { ...link, ...data } : link))
+                );
+            } else {
+                console.error("Error updating link:", data.error);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     // ========== CREAR LINK ==========
     async function handleCreate() {
         try {
@@ -91,6 +112,7 @@ export default function AdminPage() {
                 setLinks={setLinks}
                 sections={sections}
                 setSections={setSections}
+                onUpdateLink={handleUpdateLink}
             />
 
             <SocialLinksPanel />
