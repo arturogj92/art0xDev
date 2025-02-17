@@ -36,13 +36,11 @@ function getSocialIcon(name: string) {
 
 interface SortableSocialItemProps {
     social: SocialLinkData;
-    onDelete: (id: string) => void;
     onUpdate: (id: string, updates: Partial<SocialLinkData>) => void;
 }
 
 export function SortableSocialItem({
                                        social,
-                                       onDelete,
                                        onUpdate,
                                    }: SortableSocialItemProps) {
     const {
@@ -67,7 +65,7 @@ export function SortableSocialItem({
         <li
             ref={setNodeRef}
             style={style}
-            className="border p-2 rounded flex flex-col gap-2"
+            className="border p-2 rounded flex items-center justify-left gap-2"
         >
             {/* Drag handle */}
             <div
@@ -75,25 +73,14 @@ export function SortableSocialItem({
                 {...attributes}
                 {...listeners}
             >
-                Arrastra
+                ☰
             </div>
 
             <div className="flex flex-col sm:flex-row gap-2">
                 {/* Icono + Nombre */}
                 <div className="flex items-center gap-2">
                     {Icon && <span className="text-xl">{Icon}</span>}
-                    <select
-                        className="border rounded p-1"
-                        value={social.name}
-                        onChange={(e) => onUpdate(social.id, { name: e.target.value })}
-                    >
-                        <option value="instagram">Instagram</option>
-                        <option value="twitter">Twitter</option>
-                        <option value="youtube">YouTube</option>
-                        <option value="tiktok">TikTok</option>
-                        <option value="github">GitHub</option>
-                        <option value="linkedin">LinkedIn</option>
-                    </select>
+
                 </div>
 
                 {/* URL */}
@@ -116,12 +103,6 @@ export function SortableSocialItem({
                         }
                     />
                 </div>
-            </div>
-
-            <div className="flex justify-end">
-                <Button variant="destructive" onClick={() => onDelete(social.id)}>
-                    Eliminar
-                </Button>
             </div>
         </li>
     );

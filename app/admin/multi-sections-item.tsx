@@ -69,16 +69,6 @@ export default function MultiSectionsItem({
             {isEditing ? (
                 // === MODO EDICIÓN ===
                 <div className="flex flex-col gap-2">
-                    {/* Drag handle */}
-                    <div
-                        className="cursor-grab px-2 select-none text-sm bg-gray-700 text-white rounded w-fit"
-                        ref={setActivatorNodeRef}
-                        {...attributes}
-                        {...listeners}
-                    >
-                        ☰
-                    </div>
-
                     <div className="flex items-center gap-2">
                         <label className="text-sm">Título:</label>
                         <Input

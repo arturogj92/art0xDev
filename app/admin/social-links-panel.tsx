@@ -67,23 +67,6 @@ export default function SocialLinksPanel() {
         }
     }
 
-    // 3. Eliminar
-    async function handleDelete(id: string) {
-        try {
-            const res = await fetch(`/api/social-links?id=${id}`, {
-                method: "DELETE",
-            });
-            const data = await res.json();
-            if (res.ok) {
-                setSocialLinks((prev) => prev.filter((s) => s.id !== id));
-            } else {
-                console.error("Error deleting social link:", data.error);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
     // 4. Actualizar
     async function handleUpdate(id: string, updates: Partial<SocialLinkData>) {
         try {
@@ -190,7 +173,6 @@ export default function SocialLinksPanel() {
                                 <SortableSocialItem
                                     key={soc.id}
                                     social={soc}
-                                    onDelete={handleDelete}
                                     onUpdate={handleUpdate}
                                 />
                             ))}
