@@ -35,31 +35,6 @@ export default function SocialLinksPanel() {
             .catch((err) => console.error("Error fetching social links:", err));
     }, []);
 
-    // 2. Crear
-    async function handleCreate() {
-        try {
-            const res = await fetch("/api/social-links", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(newSocial),
-            });
-            const data = await res.json();
-            if (res.ok) {
-                setSocialLinks((prev) => [...prev, data]);
-                setNewSocial({
-                    name: "instagram",
-                    url: "",
-                    visible: true,
-                    position: 0,
-                });
-            } else {
-                console.error("Error creating social link:", data.error);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
     // 4. Actualizar
     async function handleUpdate(id: string, updates: Partial<SocialLinkData>) {
         try {

@@ -4,6 +4,7 @@ import {useEffect, useState} from "react";
 import {
     DndContext,
     DragEndEvent,
+    DragOverEvent,
     DragOverlay,
     DragStartEvent,
     KeyboardSensor,
@@ -35,16 +36,15 @@ export default function MultiSectionsBoard({
                                            }: MultiSectionsBoardProps) {
     const [containers, setContainers] = useState<{ id: string; items: string[] }[]>([]);
     const [activeId, setActiveId] = useState<string | null>(null);
+    const [showOverlay, setShowOverlay] = useState(false);
+
 
     useEffect(() => {
-        // En lugar de crear "no-section", simplemente lo omitimos.
-        // Quedan solo las secciones reales
         const sortedSecs = [...sections].sort((a, b) => a.position - b.position);
 
-        // Por cada sección, generamos un contenedor con sus enlaces
         const sectionContainers = sortedSecs.map((sec) => {
             const secItems = links
-                .filter((l) => l.section_id === sec.id)   // <-- FILTRO
+                .filter((l) => l.section_id === sec.id)
                 .sort((a, b) => a.position - b.position)
                 .map((l) => l.id);
 
@@ -52,7 +52,6 @@ export default function MultiSectionsBoard({
         });
 
 
-        // Asignamos al estado
         setContainers(sectionContainers);
     }, [links, sections]);
 
@@ -96,11 +95,37 @@ export default function MultiSectionsBoard({
     // ========== DRAG & DROP PARA ENLACES ==========
     function handleDragStart(event: DragStartEvent) {
         setActiveId(event.active.id as string);
+        setShowOverlay(false);
+    }
+
+    function handleDragOver(event: DragOverEvent) {
+        const {active, over} = event;
+        if (!over) return;
+
+        // Hallar contenedor de origen
+        const activeContainer = containers.find((c) => c.items.includes(active.id as string));
+        // Hallar contenedor de destino
+        const overContainer =
+            containers.find((c) => c.items.includes(over.id as string)) ||
+            containers.find((c) => c.id === (over.id as string));
+
+        if (!activeContainer || !overContainer) {
+            setShowOverlay(false);
+            return;
+        }
+
+        // Si la sección destino es DISTINTA, showOverlay = true
+        if (activeContainer.id !== overContainer.id) {
+            setShowOverlay(true);
+        } else {
+            setShowOverlay(false);
+        }
     }
 
     function handleDragEnd(event: DragEndEvent) {
         const { active, over } = event;
         setActiveId(null);
+        setShowOverlay(false);
         if (!over) return;
 
         const activeContainer = containers.find((c) =>
@@ -236,6 +261,7 @@ export default function MultiSectionsBoard({
             sensors={sensors}
             collisionDetection={rectIntersection}
             onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
         >
             {/* SortableContext => contenedores de SECCIONES (no reordenamos secciones con drag) */}
@@ -263,14 +289,26 @@ export default function MultiSectionsBoard({
                 </div>
             </SortableContext>
 
-            <DragOverlay>
-                {activeLink ? (
-                    <div className="cursor-grab text-sm text-gray-300 bg-gray-700 rounded px-2 p-2">
-                        <div className="font-semibold">{activeLink.title}</div>
-                        <div className="text-xs text-gray-400">{activeLink.url}</div>
-                    </div>
+            <DragOverlay
+                dropAnimation={null}>
+                {showOverlay && activeId ? (
+                    // si showOverlay es true y hay un link arrastrando
+                    <OverlayItem activeId={activeId} links={links}/>
                 ) : null}
             </DragOverlay>
         </DndContext>
+    );
+}
+
+
+function OverlayItem({activeId, links}: { activeId: string; links: LinkData[] }) {
+    const link = links.find((l) => l.id === activeId);
+    if (!link) return null;
+
+    return (
+        <div className="cursor-grab text-sm text-gray-300 bg-gray-700 rounded px-2 p-2">
+            <div className="font-semibold">{link.title}</div>
+            <div className="text-xs text-gray-400">{link.url}</div>
+        </div>
     );
 }

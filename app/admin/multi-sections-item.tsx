@@ -50,12 +50,14 @@ export default function MultiSectionsItem({
         transform,
         transition,
         isDragging,
-    } = useSortable({ id: link.id });
+    } = useSortable({
+        id: link.id,
+    });
 
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
-        opacity: isDragging ? 0.6 : undefined,
+        background: isDragging ? "rgba(255,255,255,0.1)" : "transparent",
     };
 
     const [isEditing, setIsEditing] = useState(false);
