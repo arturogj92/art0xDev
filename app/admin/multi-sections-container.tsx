@@ -44,6 +44,7 @@ interface MultiSectionsContainerProps {
     idx: number;  // índice en el array
     total: number; // total de contenedores
     onUpdateLink: (id: string, updates: Partial<LinkData>) => void;
+    onCreateLinkInSection: (sectionId: string) => void;
 }
 
 export default function MultiSectionsContainer({
@@ -56,6 +57,7 @@ export default function MultiSectionsContainer({
                                                    idx,
                                                    total,
                                                    onUpdateLink,
+                                                   onCreateLinkInSection,
                                                }: MultiSectionsContainerProps) {
     // droppable => permitir soltar enlaces
     const { setNodeRef } = useDroppable({ id: containerId });
@@ -102,6 +104,14 @@ export default function MultiSectionsContainer({
                         >
                             <ArrowDownIcon />
                         </button>
+                        {sec && (
+                            <button
+                                onClick={() => onCreateLinkInSection(sec.id)}
+                                className="bg-black text-white rounded px-2"
+                            >
+                                + Link
+                            </button>
+                        )}
                     </div>
                 )}
             </div>

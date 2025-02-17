@@ -96,14 +96,6 @@ export default function AdminPage() {
         <div className="p-4">
             <h1 className="text-2xl font-bold mb-4">Panel de Administración (Editables)</h1>
 
-            {/* Formulario para crear enlaces */}
-            <CreationForm
-                newLink={newLink}
-                setNewLink={setNewLink}
-                onCreate={handleCreate}
-                sections={sections}
-            />
-
             {/* Board para reordenar enlaces (drag & drop) */}
             <MultiSectionsBoard
                 links={links}

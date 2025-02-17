@@ -63,6 +63,38 @@ export default function MultiSectionsBoard({
         useSensor(KeyboardSensor)
     );
 
+
+    // NUEVA FUNCIÓN:
+    async function createLinkInSection(sectionId: string) {
+        // 1. Construir un link "dummy"
+        const dummyLink = {
+            title: "Nuevo Enlace",
+            url: "",
+            image: "",
+            visible: true,
+            position: 0, // se ajustará después
+            section_id: sectionId,
+        };
+
+        // 2. POST al backend
+        try {
+            const res = await fetch("/api/links", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(dummyLink),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                // 3. Insertar en estado local
+                setLinks((prev) => [...prev, data]);
+            } else {
+                console.error("Error creando link:", data.error);
+            }
+        } catch (error) {
+            console.error("Error creando link:", error);
+        }
+    }
+
     // ========== DRAG & DROP PARA ENLACES ==========
     function handleDragStart(event: DragStartEvent) {
         setActiveId(event.active.id as string);
@@ -226,6 +258,7 @@ export default function MultiSectionsBoard({
                             idx={idx}
                             total={containers.length}
                             onUpdateLink={onUpdateLink}
+                            onCreateLinkInSection={createLinkInSection}
                         />
                     ))}
                 </div>
