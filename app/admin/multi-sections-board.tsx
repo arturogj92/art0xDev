@@ -20,11 +20,6 @@ import {
 import { LinkData, SectionData } from "./types";
 import MultiSectionsContainer from "./multi-sections-container";
 
-/**
- * Reordena enlaces con drag & drop, y secciones con flechas (dentro del contenedor).
- * - links, setLinks => para actualizar enlaces
- * - sections, setSections => para actualizar secciones
- */
 interface MultiSectionsBoardProps {
     links: LinkData[];
     setLinks: React.Dispatch<React.SetStateAction<LinkData[]>>;
@@ -42,28 +37,22 @@ export default function MultiSectionsBoard({
     const [activeId, setActiveId] = useState<string | null>(null);
 
     useEffect(() => {
-        // 1. "no-section"
-        const noSectionItems = links
-            .filter((l) => !l.pinned && !l.section_id)
-            .sort((a, b) => a.position - b.position)
-            .map((l) => l.id);
+        // En lugar de crear "no-section", simplemente lo omitimos.
+        // Quedan solo las secciones reales
+        const sortedSecs = [...sections].sort((a, b) => a.position - b.position);
 
-        // 2. Secciones reales
-        const sectionContainers = sections
-            .sort((a, b) => a.position - b.position)
-            .map((sec) => {
-                const secItems = links
-                    .filter((l) => !l.pinned && l.section_id === sec.id)
-                    .sort((a, b) => a.position - b.position)
-                    .map((l) => l.id);
+        // Por cada sección, generamos un contenedor con sus enlaces
+        const sectionContainers = sortedSecs.map((sec) => {
+            const secItems = links
+                .filter((l) => !l.pinned && l.section_id === sec.id)
+                .sort((a, b) => a.position - b.position)
+                .map((l) => l.id);
 
-                return { id: sec.id, items: secItems };
-            });
+            return { id: sec.id, items: secItems };
+        });
 
-        setContainers([
-            { id: "no-section", items: noSectionItems },
-            ...sectionContainers,
-        ]);
+        // Asignamos al estado
+        setContainers(sectionContainers);
     }, [links, sections]);
 
     const sensors = useSensors(
@@ -128,7 +117,7 @@ export default function MultiSectionsBoard({
 
     // Actualiza section_id => PATCH
     async function updateLinkContainer(linkId: string, containerId: string) {
-        const section_id = containerId === "no-section" ? null : containerId;
+        const section_id = containerId; // ya no usamos "no-section"
         setLinks((prev) => {
             const newLinks = structuredClone(prev);
             const link = newLinks.find((l) => l.id === linkId);
@@ -145,7 +134,7 @@ export default function MultiSectionsBoard({
         });
     }
 
-    // Reasigna position => PATCH
+    // Reasignar position => PATCH
     async function reorderLinksInContainer(itemIds: string[]) {
         setLinks((prev) => {
             const newLinks = structuredClone(prev);
@@ -166,8 +155,7 @@ export default function MultiSectionsBoard({
         });
     }
 
-    // ========== REORDENAR SECCIONES CON FLECHAS (dentro del contenedor) ==========
-    // Llamado por multi-sections-container
+    // ========== REORDENAR SECCIONES CON FLECHAS ========== (Si lo mantienes)
     function moveSectionUp(sectionId: string) {
         setSections((prev) => {
             const idx = prev.findIndex((s) => s.id === sectionId);
@@ -197,19 +185,15 @@ export default function MultiSectionsBoard({
     }
 
     async function patchSections(finalArr: SectionData[]) {
-        try {
-            const body = finalArr.map((sec) => ({
-                id: sec.id,
-                position: sec.position,
-            }));
-            await fetch("/api/sections", {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body),
-            });
-        } catch (error) {
-            console.error("Error patching sections:", error);
-        }
+        const body = finalArr.map((sec) => ({
+            id: sec.id,
+            position: sec.position,
+        }));
+        await fetch("/api/sections", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+        });
     }
 
     // Drag Overlay => ver si arrastramos un enlace
@@ -222,23 +206,23 @@ export default function MultiSectionsBoard({
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
         >
-            {/* SortableContext => contenedores para secciones,
-          pero NO reordenamos contenedores con drag,
-          sino que se mantiene la disposición. */}
+            {/* SortableContext => contenedores de SECCIONES (no reordenamos secciones con drag) */}
             <SortableContext
                 items={containers.map((c) => c.id)}
                 strategy={verticalListSortingStrategy}
             >
                 <div className="flex flex-col gap-6">
-                    {containers.map((container) => (
+                    {containers.map((container, idx) => (
                         <MultiSectionsContainer
                             key={container.id}
                             containerId={container.id}
                             items={container.items}
                             links={links}
                             sections={sections}
-                            moveSectionUp={moveSectionUp}    // <-- flechas
-                            moveSectionDown={moveSectionDown} // <-- flechas
+                            moveSectionUp={moveSectionUp}
+                            moveSectionDown={moveSectionDown}
+                            idx={idx}
+                            total={containers.length}
                         />
                     ))}
                 </div>

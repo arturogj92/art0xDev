@@ -1,54 +1,73 @@
-// components/SocialLinks.tsx
 "use client";
 
-import { FaInstagram, FaYoutube, FaTiktok, FaGithub, FaXTwitter } from "react-icons/fa6";
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
+import {
+    FaInstagram,
+    FaYoutube,
+    FaTiktok,
+    FaGithub,
+    FaXTwitter,
+    FaLinkedin,
+} from "react-icons/fa6";
+import { SocialLinkData } from "@/app/admin/types";
 
+// Mapeo name => icon
+function getSocialIcon(name: string) {
+    switch (name) {
+        case "instagram":
+            return <FaInstagram size={28} />;
+        case "twitter":
+            return <FaXTwitter size={28} />;
+        case "youtube":
+            return <FaYoutube size={28} />;
+        case "tiktok":
+            return <FaTiktok size={28} />;
+        case "github":
+            return <FaGithub size={28} />;
+        case "linkedin":
+            return <FaLinkedin size={28} />;
+        default:
+            return null;
+    }
+}
+
+/**
+ * Muestra las redes sociales que están `visible`, ordenadas por `position`.
+ */
 const SocialLinks: FC = () => {
+    const [socialLinks, setSocialLinks] = useState<SocialLinkData[]>([]);
+
+    useEffect(() => {
+        fetch("/api/social-links")
+            .then((res) => res.json())
+            .then((data) => {
+                if (Array.isArray(data)) {
+                    setSocialLinks(data);
+                }
+            })
+            .catch((err) => console.error("Error fetching social links:", err));
+    }, []);
+
+    const visibleLinks = socialLinks
+        .filter((s) => s.visible)
+        .sort((a, b) => a.position - b.position);
+
     return (
         <div className="flex justify-center gap-4 mt-8">
-            {/* Instagram */}
-            <a
-                href="https://www.instagram.com/art0xdev"
-                target="_blank"
-                rel="noopener noreferrer"
-            >
-                <FaInstagram size={28} />
-            </a>
-
-            {/* Twitter (actualmente X) */}
-            <a
-                href="https://x.com/Art0xDev?mx=2"
-                target="_blank"
-                rel="noopener noreferrer"
-            >
-                <FaXTwitter size={28} />
-            </a>
-
-            {/* YouTube */}
-            <a
-                href="https://www.youtube.com/channel/UCcNKoN1XtrOH5WB5lBN8jaQ"
-                target="_blank"
-                rel="noopener noreferrer"
-            >
-                <FaYoutube size={28} />
-            </a>
-            {/* tiktok */}
-            <a
-                href="https://www.tiktok.com/@art0xdev"
-                target="_blank"
-                rel="noopener noreferrer"
-            >
-                <FaTiktok size={28} />
-            </a>
-            {/* tiktok */}
-            <a
-                href="https://github.com/arturogj92"
-                target="_blank"
-                rel="noopener noreferrer"
-            >
-                <FaGithub size={28} />
-            </a>
+            {visibleLinks.map((link) => {
+                const Icon = getSocialIcon(link.name);
+                if (!Icon) return null;
+                return (
+                    <a
+                        key={link.id}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        {Icon}
+                    </a>
+                );
+            })}
         </div>
     );
 };

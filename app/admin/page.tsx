@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { LinkData, SectionData } from "./types";
 import { CreationForm } from "./creation-form";
 import MultiSectionsBoard from "./multi-sections-board";
+import SocialLinksPanel from "@/app/admin/social-links-panel";
 
 export default function AdminPage() {
     const [links, setLinks] = useState<LinkData[]>([]);
@@ -72,54 +73,6 @@ export default function AdminPage() {
         }
     }
 
-    // ========== REORDENAR SECCIONES CON FLECHAS ==========
-    function moveSectionUp(sectionId: string) {
-        setSections((prev) => {
-            const idx = prev.findIndex((s) => s.id === sectionId);
-            if (idx <= 0) return prev; // no sube si está arriba del todo
-
-            const newArr = [...prev];
-            [newArr[idx], newArr[idx - 1]] = [newArr[idx - 1], newArr[idx]];
-            // reasignar position
-            newArr.forEach((sec, i) => {
-                sec.position = i;
-            });
-            patchSections(newArr);
-            return newArr;
-        });
-    }
-
-    function moveSectionDown(sectionId: string) {
-        setSections((prev) => {
-            const idx = prev.findIndex((s) => s.id === sectionId);
-            if (idx < 0 || idx >= prev.length - 1) return prev; // no baja si está al final
-
-            const newArr = [...prev];
-            [newArr[idx], newArr[idx + 1]] = [newArr[idx + 1], newArr[idx]];
-            newArr.forEach((sec, i) => {
-                sec.position = i;
-            });
-            patchSections(newArr);
-            return newArr;
-        });
-    }
-
-    async function patchSections(finalArr: SectionData[]) {
-        try {
-            const body = finalArr.map((s) => ({
-                id: s.id,
-                position: s.position,
-            }));
-            await fetch("/api/sections", {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body),
-            });
-        } catch (error) {
-            console.error("Error patching sections:", error);
-        }
-    }
-
     return (
         <div className="p-4">
             <h1 className="text-2xl font-bold mb-4">Panel de Administración (Editables)</h1>
@@ -140,6 +93,7 @@ export default function AdminPage() {
                 setSections={setSections}
             />
 
+            <SocialLinksPanel />
         </div>
     );
 }
