@@ -22,7 +22,6 @@ interface MultiSectionsBoardProps {
     setLinks: React.Dispatch<React.SetStateAction<LinkData[]>>;
     sections: SectionData[];
     setSections: React.Dispatch<React.SetStateAction<SectionData[]>>;
-
     onUpdateLink: (id: string, updates: Partial<LinkData>) => void;
     onDeleteLink: (id: string) => void;
     onUpdateSection: (id: string, updates: Partial<SectionData>) => void;
@@ -43,37 +42,53 @@ export default function MultiSectionsBoard({
     const [activeId, setActiveId] = useState<string | null>(null);
     const [showOverlay, setShowOverlay] = useState(false);
 
+    // NUEVO CÓDIGO
+    async function createDummySection() {
+        const dummy = {
+            title: "Nueva Sección",
+            position: sections.length,
+        };
+        try {
+            const res = await fetch("/api/sections", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(dummy),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setSections((prev) => [...prev, data]);
+            } else {
+                console.error("Error creando sección:", data.error);
+            }
+        } catch (error) {
+            console.error("Error creando sección:", error);
+        }
+    }
+
     useEffect(() => {
-        // 1. Sección "no-section": todos los links con section_id=null
         const noSectionItems = links
             .filter((l) => l.section_id === null)
             .sort((a, b) => a.position - b.position)
             .map((l) => l.id);
 
-        // 2. Secciones reales
         const sortedSecs = [...sections].sort((a, b) => a.position - b.position);
-
         const sectionContainers = sortedSecs.map((sec) => {
             const secItems = links
                 .filter((l) => l.section_id === sec.id)
                 .sort((a, b) => a.position - b.position)
                 .map((l) => l.id);
-
             return { id: sec.id, items: secItems };
         });
 
-        // 3. Unimos "no-section" + secciones
         const combined = [
-            {id: "no-section", items: noSectionItems}, // primer contenedor
-            ...sectionContainers, // resto
+            {id: "no-section", items: noSectionItems},
+            ...sectionContainers,
         ];
-
         setContainers(combined);
     }, [links, sections]);
 
     const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
 
-    // Crear link dummy en una sección
     async function createLinkInSection(sectionId: string) {
         const dummyLink = {
             title: "Nuevo Enlace",
@@ -100,7 +115,6 @@ export default function MultiSectionsBoard({
         }
     }
 
-    // DRAG & DROP para enlaces
     function handleDragStart(event: DragStartEvent) {
         setActiveId(event.active.id as string);
         setShowOverlay(false);
@@ -109,17 +123,14 @@ export default function MultiSectionsBoard({
     function handleDragOver(event: DragOverEvent) {
         const {active, over} = event;
         if (!over) return;
-
         const activeContainer = containers.find((c) => c.items.includes(active.id as string));
         const overContainer =
             containers.find((c) => c.items.includes(over.id as string)) ||
             containers.find((c) => c.id === (over.id as string));
-
         if (!activeContainer || !overContainer) {
             setShowOverlay(false);
             return;
         }
-
         if (activeContainer.id !== overContainer.id) {
             setShowOverlay(true);
         } else {
@@ -144,7 +155,6 @@ export default function MultiSectionsBoard({
         }
 
         const newContainers = structuredClone(containers);
-
         const fromIndex = newContainers.findIndex((c) => c.id === activeContainer.id);
         const toIndex = newContainers.findIndex((c) => c.id === overContainer.id);
 
@@ -158,17 +168,13 @@ export default function MultiSectionsBoard({
         }
 
         if (activeContainer.id === overContainer.id) {
-            // Reordenar en la misma "sección"
             const reordered = arrayMove(fromItems, oldIndex, newIndex);
             newContainers[fromIndex].items = reordered;
             reorderLinksInContainer(reordered);
         } else {
-            // Mover a otro contenedor
             fromItems.splice(oldIndex, 1);
             toItems.splice(newIndex, 0, active.id as string);
-
             updateLinkContainer(active.id as string, overContainer.id);
-
             reorderLinksInContainer(toItems);
             reorderLinksInContainer(fromItems);
         }
@@ -177,9 +183,7 @@ export default function MultiSectionsBoard({
     }
 
     async function updateLinkContainer(linkId: string, containerId: string) {
-        // containerId "no-section" => section_id=null
         const newSectionId = containerId === "no-section" ? null : containerId;
-
         setLinks((prev) => {
             const newLinks = structuredClone(prev);
             const link = newLinks.find((l) => l.id === linkId);
@@ -188,7 +192,6 @@ export default function MultiSectionsBoard({
             }
             return newLinks;
         });
-
         await fetch("/api/links", {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
@@ -207,7 +210,6 @@ export default function MultiSectionsBoard({
             });
             return newLinks;
         });
-
         const updates = itemIds.map((id, idx) => ({ id, position: idx }));
         await fetch("/api/links", {
             method: "PATCH",
@@ -216,7 +218,6 @@ export default function MultiSectionsBoard({
         });
     }
 
-    // Reordenar secciones (flechas)
     function moveSectionUp(sectionId: string) {
         setSections((prev) => {
             const idx = prev.findIndex((s) => s.id === sectionId);
@@ -257,7 +258,6 @@ export default function MultiSectionsBoard({
         });
     }
 
-    // Overlay
     const activeLink = activeId ? links.find((l) => l.id === activeId) : null;
 
     return (
@@ -268,10 +268,7 @@ export default function MultiSectionsBoard({
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
         >
-            <SortableContext
-                items={containers.map((c) => c.id)}
-                strategy={verticalListSortingStrategy}
-            >
+            <SortableContext items={containers.map((c) => c.id)} strategy={verticalListSortingStrategy}>
                 <div className="flex flex-col gap-6">
                     {containers.map((container, idx) => (
                         <MultiSectionsContainer
@@ -287,17 +284,27 @@ export default function MultiSectionsBoard({
                             onUpdateLink={onUpdateLink}
                             onDeleteLink={onDeleteLink}
                             onCreateLinkInSection={createLinkInSection}
-
-                            // Pasamos props para editar/borrar secciones
                             onUpdateSection={onUpdateSection}
                             onDeleteSection={onDeleteSection}
                         />
                     ))}
+
+                    {/* NUEVO CÓDIGO */}
+                    <div className="mt-4 flex justify-end">
+                        <button
+                            onClick={createDummySection}
+                            className="bg-blue-600 text-white px-4 py-2 rounded"
+                        >
+                            Crear Nueva Sección
+                        </button>
+                    </div>
                 </div>
             </SortableContext>
 
             <DragOverlay dropAnimation={null}>
-                {showOverlay && activeLink ? <OverlayItem link={activeLink}/> : null}
+                {showOverlay && activeLink ? (
+                    <OverlayItem link={activeLink}/>
+                ) : null}
             </DragOverlay>
         </DndContext>
     );

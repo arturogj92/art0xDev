@@ -1,11 +1,11 @@
 // app/admin/types.ts
 
 export interface SocialLinkData {
-    id: string;         // identificador único
-    name: string;       // "instagram" | "twitter" | "youtube" | "tiktok" | "github" | "linkedin"
-    url: string;        // URL a la que apunta
-    visible: boolean;   // mostrar/ocultar
-    position: number;   // para el orden
+    id: string;
+    name: string;
+    url: string;
+    visible: boolean;
+    position: number;
 }
 
 export interface LinkData {

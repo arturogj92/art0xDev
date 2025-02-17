@@ -29,7 +29,7 @@ function ArrowUpIcon() {
         >
             <path
                 fillRule="evenodd"
-                d="M9.47 6.47a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 1 1-1.06 1.06L10 8.06l-3.72 3.72a.75.75 0 0 1-1.06-1.06l4.25-4.25Z"
+                d="M9.47 6.47a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 1 1-1.06 1.06L10 8.06 6.28 11.78a.75.75 0 1 1-1.06-1.06l4.25-4.25Z"
                 clipRule="evenodd"
             />
         </svg>
@@ -45,7 +45,7 @@ function ArrowDownIcon() {
         >
             <path
                 fillRule="evenodd"
-                d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+                d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 13.06l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
                 clipRule="evenodd"
             />
         </svg>
@@ -98,18 +98,13 @@ interface MultiSectionsContainerProps {
     items: string[];
     links: LinkData[];
     sections: SectionData[];
-
     moveSectionUp: (sectionId: string) => void;
     moveSectionDown: (sectionId: string) => void;
-
     idx: number;
     total: number;
-
     onUpdateLink: (id: string, updates: Partial<LinkData>) => void;
     onDeleteLink: (id: string) => void;
     onCreateLinkInSection: (sectionId: string) => void;
-
-    // Para editar/borrar la sección
     onUpdateSection: (id: string, updates: Partial<SectionData>) => void;
     onDeleteSection: (id: string) => void;
 }
@@ -126,33 +121,20 @@ export default function MultiSectionsContainer({
                                                    onUpdateLink,
                                                    onDeleteLink,
                                                    onCreateLinkInSection,
-
                                                    onUpdateSection,
                                                    onDeleteSection,
                                                }: MultiSectionsContainerProps) {
     const { setNodeRef } = useDroppable({ id: containerId });
-
-    // Si containerId === "no-section", es la sección "Sin Sección"
-    const isNoSection = containerId === "no-section";
-
-    // Buscar la sección real
     const sec = sections.find((s) => s.id === containerId);
-
-    // Lógica flechas
+    const isNoSection = containerId === "no-section";
     const hideUp = idx === 0;
     const hideDown = idx === total - 1;
-
-    // Convertir items a LinkData
     const linkObjects = items.map((id) => links.find((l) => l.id === id)).filter(Boolean);
 
-    // Estado para editar la sección
     const [isEditingSection, setIsEditingSection] = useState(false);
     const [editTitle, setEditTitle] = useState(sec?.title || "");
-
-    // Modal de borrado
     const [showDeleteModalSection, setShowDeleteModalSection] = useState(false);
 
-    // Si la sección cambia, recargamos el título
     useEffect(() => {
         if (sec) {
             setEditTitle(sec.title);
@@ -174,67 +156,48 @@ export default function MultiSectionsContainer({
     function handleDeleteClick() {
         setShowDeleteModalSection(true);
     }
+
     function confirmDeleteSection() {
         setShowDeleteModalSection(false);
         if (sec) {
             onDeleteSection(sec.id);
         }
     }
+
     function cancelDeleteSection() {
         setShowDeleteModalSection(false);
-    }
-
-    // Render del título
-    let titleContent: React.ReactNode = "Sin Sección";
-    if (isNoSection) {
-        // "Sin Sección"
-        titleContent = "Sin Sección";
-    } else if (sec) {
-        if (isEditingSection) {
-            // Modo edición
-            titleContent = (
-                <div className="flex items-center gap-2">
-                    <input
-                        className="border rounded p-1"
-                        value={editTitle}
-                        onChange={(e) => setEditTitle(e.target.value)}
-                    />
-                    <button
-                        onClick={handleSaveSection}
-                        className="bg-green-600 text-white px-2 py-1 rounded"
-                    >
-                        Guardar
-                    </button>
-                    <button
-                        onClick={handleCancelSection}
-                        className="bg-gray-400 text-white px-2 py-1 rounded"
-                    >
-                        Cancelar
-                    </button>
-                </div>
-            );
-        } else {
-            // Modo lectura
-            titleContent = sec.title;
-        }
     }
 
     return (
         <div ref={setNodeRef} className="border p-4 rounded bg-white/5">
             <div className="flex items-center justify-between mb-2">
-                <h3 className="font-semibold text-lg">{titleContent}</h3>
+                {isEditingSection && sec ? (
+                    <div className="flex items-center gap-2">
+                        <input
+                            className="border rounded p-1"
+                            value={editTitle}
+                            onChange={(e) => setEditTitle(e.target.value)}
+                        />
+                        <button
+                            onClick={handleSaveSection}
+                            className="bg-green-600 text-white px-2 py-1 rounded"
+                        >
+                            Guardar
+                        </button>
+                        <button
+                            onClick={handleCancelSection}
+                            className="bg-gray-400 text-white px-2 py-1 rounded"
+                        >
+                            Cancelar
+                        </button>
+                    </div>
+                ) : (
+                    <h3 className="font-semibold text-lg">
+                        {isNoSection ? "Sin Sección" : sec?.title}
+                    </h3>
+                )}
 
-                {/* Botones de la barra de la sección */}
-                {isNoSection ? (
-                    // Sección especial "Sin Sección": no se edita ni se borra
-                    <button
-                        onClick={() => onCreateLinkInSection("no-section")}
-                        className="bg-black text-white rounded p-1 flex items-center gap-1"
-                    >
-                        <AddLink/>
-                        <span className="hidden sm:inline">Link</span>
-                    </button>
-                ) : sec && !isEditingSection ? (
+                {!isNoSection && sec && !isEditingSection && (
                     <div className="flex items-center gap-2">
                         {!hideUp && (
                             <button
@@ -255,13 +218,12 @@ export default function MultiSectionsContainer({
                             </button>
                         )}
                         <button
-                            onClick={() => onCreateLinkInSection(sec.id)}
+                            onClick={() => onCreateLinkInSection(containerId)}
                             className="bg-black text-white rounded p-1 flex items-center gap-1"
                         >
                             <AddLink/>
                             <span className="hidden sm:inline">Link</span>
                         </button>
-                        {/* Editar sección */}
                         <button
                             onClick={() => setIsEditingSection(true)}
                             className="bg-blue-600 text-white px-2 py-1 rounded flex items-center gap-1"
@@ -269,7 +231,6 @@ export default function MultiSectionsContainer({
                             <PencilIcon/>
                             <span className="hidden sm:inline">Editar</span>
                         </button>
-                        {/* Borrar sección */}
                         <button
                             onClick={handleDeleteClick}
                             className="bg-red-600 text-white px-2 py-1 rounded flex items-center gap-1"
@@ -278,7 +239,7 @@ export default function MultiSectionsContainer({
                             <span className="hidden sm:inline">Borrar</span>
                         </button>
                     </div>
-                ) : null}
+                )}
             </div>
 
             <SortableContext items={items} strategy={verticalListSortingStrategy}>
@@ -301,7 +262,6 @@ export default function MultiSectionsContainer({
                 <p className="text-sm text-gray-400">Arrastra aquí enlaces para asignar</p>
             )}
 
-            {/* Modal de confirmación para borrar la sección */}
             {showDeleteModalSection && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
                     <div className="bg-black w-full max-w-sm mx-auto p-4 rounded shadow-lg">

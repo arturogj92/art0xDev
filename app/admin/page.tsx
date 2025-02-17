@@ -10,6 +10,7 @@ export default function AdminPage() {
     const [sections, setSections] = useState<SectionData[]>([]);
 
     useEffect(() => {
+        // Cargar enlaces
         fetch("/api/links")
             .then((res) => res.json())
             .then((data) => {
@@ -19,6 +20,7 @@ export default function AdminPage() {
             })
             .catch((err) => console.error(err));
 
+        // Cargar secciones
         fetch("/api/sections")
             .then((res) => res.json())
             .then((data) => {
@@ -29,7 +31,7 @@ export default function AdminPage() {
             .catch((err) => console.error(err));
     }, []);
 
-    // Borrar enlace
+    // Eliminar enlace
     async function handleDeleteLink(id: string) {
         try {
             const res = await fetch(`/api/links?id=${id}`, {method: "DELETE"});
@@ -86,39 +88,52 @@ export default function AdminPage() {
         }
     }
 
-    // Borrar sección => reasignar enlaces a "no-section" (section_id=null)
+    // Eliminar sección
     async function handleDeleteSection(id: string) {
         try {
-            // 1. Borrar la sección en la DB
-            const res = await fetch(`/api/sections?id=${id}`, {method: "DELETE"});
-            const data = await res.json();
-            if (!res.ok) {
-                console.error("Error al eliminar sección:", data.error);
-                return;
-            }
+            // 1) Pasar todos los enlaces de esa sección a "sin sección"
+            const linksInSection = links.filter((l) => l.section_id === id);
+            if (linksInSection.length > 0) {
+                // Preparamos un array con updates: { id, section_id: null }
+                const updates = linksInSection.map((l) => ({
+                    id: l.id,
+                    section_id: null,
+                }));
 
-            // 2. Localmente, quitar la sección
-            setSections((prev) => prev.filter((sec) => sec.id !== id));
-
-            // 3. Reasignar los enlaces de esa sección a null (sin sección)
-            const linksToNull = links.filter((l) => l.section_id === id);
-            if (linksToNull.length > 0) {
-                // Ponerlos a section_id=null en estado
-                setLinks((prev) =>
-                    prev.map((l) =>
-                        l.section_id === id ? {...l, section_id: null} : l
-                    )
-                );
-                // PATCH masivo para que en DB queden con section_id=null
-                const updates = linksToNull.map((l) => ({id: l.id, section_id: null}));
-                await fetch("/api/links", {
+                // PATCH masivo
+                const patchRes = await fetch("/api/links", {
                     method: "PATCH",
                     headers: {"Content-Type": "application/json"},
                     body: JSON.stringify(updates),
                 });
+                const patchData = await patchRes.json();
+                if (!patchRes.ok) {
+                    console.error("Error reasignando enlaces:", patchData.error);
+                    return;
+                }
+
+                // Actualizar estado local
+                setLinks((prev) => {
+                    const newLinks = structuredClone(prev);
+                    newLinks.forEach((lnk) => {
+                        if (lnk.section_id === id) {
+                            lnk.section_id = null;
+                        }
+                    });
+                    return newLinks;
+                });
+            }
+
+            // 2) Eliminar la sección
+            const res = await fetch(`/api/sections?id=${id}`, {method: "DELETE"});
+            const data = await res.json();
+            if (res.ok) {
+                setSections((prev) => prev.filter((sec) => sec.id !== id));
+            } else {
+                console.error("Error al eliminar sección:", data.error);
             }
         } catch (error) {
-            console.error("Error al eliminar sección:", error);
+            console.error(error);
         }
     }
 

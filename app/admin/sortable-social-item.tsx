@@ -1,19 +1,11 @@
 "use client";
 
-import { CSS } from "@dnd-kit/utilities";
-import { useSortable } from "@dnd-kit/sortable";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { SocialLinkData } from "./types";
-import {
-    FaInstagram,
-    FaYoutube,
-    FaTiktok,
-    FaGithub,
-    FaXTwitter,
-    FaLinkedin,
-} from "react-icons/fa6";
+import {CSS} from "@dnd-kit/utilities";
+import {useSortable} from "@dnd-kit/sortable";
+import {Switch} from "@/components/ui/switch";
+import {Input} from "@/components/ui/input";
+import {SocialLinkData} from "./types";
+import {FaGithub, FaInstagram, FaLinkedin, FaTiktok, FaXTwitter, FaYoutube,} from "react-icons/fa6";
 
 function getSocialIcon(name: string) {
     switch (name) {
@@ -39,10 +31,7 @@ interface SortableSocialItemProps {
     onUpdate: (id: string, updates: Partial<SocialLinkData>) => void;
 }
 
-export function SortableSocialItem({
-                                       social,
-                                       onUpdate,
-                                   }: SortableSocialItemProps) {
+export function SortableSocialItem({social, onUpdate}: SortableSocialItemProps) {
     const {
         attributes,
         listeners,
@@ -58,7 +47,6 @@ export function SortableSocialItem({
         background: isDragging ? "rgba(255,255,255,0.1)" : "transparent",
     };
 
-    // Icon
     const Icon = getSocialIcon(social.name);
 
     return (
@@ -67,7 +55,6 @@ export function SortableSocialItem({
             style={style}
             className="border p-2 rounded flex items-center justify-left gap-2"
         >
-            {/* Drag handle */}
             <div
                 className="cursor-grab px-2 select-none text-sm bg-gray-700 text-white rounded w-fit"
                 {...attributes}
@@ -75,34 +62,35 @@ export function SortableSocialItem({
             >
                 ☰
             </div>
-
-            <div className="flex flex-col sm:flex-row gap-2">
-                {/* Icono + Nombre */}
-                <div className="flex items-center gap-2">
-                    {Icon && <span className="text-xl">{Icon}</span>}
-
-                </div>
-
-                {/* URL */}
-                <div className="flex-1 flex flex-col">
-                    <label className="text-sm font-medium">URL</label>
-                    <Input
-                        value={social.url}
-                        onChange={(e) => onUpdate(social.id, { url: e.target.value })}
-                    />
-                </div>
-
-                {/* Visible */}
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium">Visible</label>
-                    <Switch
-                        className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-red-500"
-                        checked={social.visible}
-                        onCheckedChange={(checked) =>
-                            onUpdate(social.id, { visible: checked })
-                        }
-                    />
-                </div>
+            <div className="flex items-center gap-2">
+                {Icon && <span className="text-xl">{Icon}</span>}
+                <select
+                    className="border rounded p-1"
+                    value={social.name}
+                    onChange={(e) => onUpdate(social.id, {name: e.target.value})}
+                >
+                    <option value="instagram">Instagram</option>
+                    <option value="twitter">Twitter</option>
+                    <option value="youtube">YouTube</option>
+                    <option value="tiktok">TikTok</option>
+                    <option value="github">GitHub</option>
+                    <option value="linkedin">LinkedIn</option>
+                </select>
+            </div>
+            <div className="flex-1 flex flex-col">
+                <label className="text-sm font-medium">URL</label>
+                <Input
+                    value={social.url}
+                    onChange={(e) => onUpdate(social.id, {url: e.target.value})}
+                />
+            </div>
+            <div className="flex flex-col">
+                <label className="text-sm font-medium">Visible</label>
+                <Switch
+                    className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-red-500"
+                    checked={social.visible}
+                    onCheckedChange={(checked) => onUpdate(social.id, {visible: checked})}
+                />
             </div>
         </li>
     );

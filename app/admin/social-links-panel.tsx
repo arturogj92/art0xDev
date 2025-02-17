@@ -16,14 +16,7 @@ import {SortableSocialItem} from "./sortable-social-item";
 
 export default function SocialLinksPanel() {
     const [socialLinks, setSocialLinks] = useState<SocialLinkData[]>([]);
-    const [newSocial, setNewSocial] = useState<Omit<SocialLinkData, "id">>({
-        name: "instagram",
-        url: "",
-        visible: true,
-        position: 0,
-    });
 
-    // 1. Cargar la lista
     useEffect(() => {
         fetch("/api/social-links")
             .then((res) => res.json())
@@ -35,13 +28,8 @@ export default function SocialLinksPanel() {
             .catch((err) => console.error("Error fetching social links:", err));
     }, []);
 
-    // 4. Actualizar
     async function handleUpdate(id: string, updates: Partial<SocialLinkData>) {
         try {
-            console.log("Creando social link:", newSocial);
-            console.log("Creando updates :", updates);
-
-
             const res = await fetch("/api/social-links", {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
@@ -60,7 +48,6 @@ export default function SocialLinksPanel() {
         }
     }
 
-    // 5. Reordenar con dnd-kit
     const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
 
     function handleDragEnd(event: DragEndEvent) {
@@ -72,27 +59,19 @@ export default function SocialLinksPanel() {
         if (oldIndex < 0 || newIndex < 0) return;
 
         const newArr = arrayMove(socialLinks, oldIndex, newIndex);
-        // reasignar position local
         const updated = newArr.map((s, idx) => ({ ...s, position: idx }));
         setSocialLinks(updated);
 
-        // PATCH masivo
         fetch("/api/social-links", {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(
-                updated.map((item) => ({
-                    id: item.id,
-                    position: item.position,
-                }))
-            ),
+            body: JSON.stringify(updated.map((item) => ({id: item.id, position: item.position}))),
         });
     }
 
     return (
         <div className="border p-4 my-8">
             <h2 className="text-lg font-semibold">Social Links</h2>
-            {/* Lista con drag & drop */}
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext
                     items={socialLinks.map((s) => s.id)}
@@ -102,11 +81,7 @@ export default function SocialLinksPanel() {
                         {socialLinks
                             .sort((a, b) => a.position - b.position)
                             .map((soc) => (
-                                <SortableSocialItem
-                                    key={soc.id}
-                                    social={soc}
-                                    onUpdate={handleUpdate}
-                                />
+                                <SortableSocialItem key={soc.id} social={soc} onUpdate={handleUpdate}/>
                             ))}
                     </ul>
                 </SortableContext>
