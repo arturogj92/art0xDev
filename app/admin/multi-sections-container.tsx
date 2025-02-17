@@ -5,31 +5,34 @@ import {SortableContext, verticalListSortingStrategy} from "@dnd-kit/sortable";
 import {LinkData, SectionData} from "./types";
 import MultiSectionsItem from "./multi-sections-item";
 
+function AddLink() {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="size-5">
+            <path
+                d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z"/>
+        </svg>
+    )
+}
+
+
 /** Icono flecha arriba (Heroicons) */
 function ArrowUpIcon() {
     return (
-        <svg
-            className="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.5}
-            viewBox="0 0 24 24"
-        >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="size-5">
+            <path fillRule="evenodd"
+                  d="M9.47 6.47a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 1 1-1.06 1.06L10 8.06l-3.72 3.72a.75.75 0 0 1-1.06-1.06l4.25-4.25Z"
+                  clipRule="evenodd"/>
         </svg>
     );
 }
+
 /** Icono flecha abajo (Heroicons) */
 function ArrowDownIcon() {
     return (
-        <svg
-            className="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.5}
-            viewBox="0 0 24 24"
-        >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="size-5">
+            <path fillRule="evenodd"
+                  d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+                  clipRule="evenodd"/>
         </svg>
     );
 }
@@ -111,7 +114,7 @@ export default function MultiSectionsContainer({
                                 onClick={() => onCreateLinkInSection(sec.id)}
                                 className="bg-black text-white rounded px-2"
                             >
-                                + Link
+                                <AddLink/>
                             </button>
                         )}
                     </div>
