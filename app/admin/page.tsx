@@ -1,3 +1,4 @@
+// app/admin/page.tsx (AdminPage)
 "use client";
 
 import {useEffect, useState} from "react";
@@ -91,12 +92,13 @@ export default function AdminPage() {
     // Eliminar sección
     async function handleDeleteSection(id: string) {
         try {
-            // 1) Pasar todos los enlaces de esa sección a "sin sección"
-            const linksInSection = links.filter((l) => l.section_id === id);
-            if (linksInSection.length > 0) {
-                // Preparamos un array con updates: { id, section_id: null }
-                const updates = linksInSection.map((l) => ({
-                    id: l.id,
+            // 1. Buscar enlaces con section_id = id (en estado local)
+            const linksToReassign = links.filter((l) => l.section_id === id);
+
+            // 2. Reasignar en backend => poner section_id=null
+            if (linksToReassign.length > 0) {
+                const updates = linksToReassign.map((ln) => ({
+                    id: ln.id,
                     section_id: null,
                 }));
 
@@ -108,32 +110,30 @@ export default function AdminPage() {
                 });
                 const patchData = await patchRes.json();
                 if (!patchRes.ok) {
-                    console.error("Error reasignando enlaces:", patchData.error);
-                    return;
+                    console.error("Error reasignando links en backend:", patchData.error);
+                    // Podemos continuar o retornar, según quieras.
                 }
-
-                // Actualizar estado local
-                setLinks((prev) => {
-                    const newLinks = structuredClone(prev);
-                    newLinks.forEach((lnk) => {
-                        if (lnk.section_id === id) {
-                            lnk.section_id = null;
-                        }
-                    });
-                    return newLinks;
-                });
             }
 
-            // 2) Eliminar la sección
+            // 3. Actualizar en el FRONT => para que aparezcan de inmediato en 'sin sección'
+            setLinks((prev) =>
+                prev.map((link) =>
+                    link.section_id === id ? {...link, section_id: null} : link
+                )
+            );
+
+            // 4. Borrar la sección en backend
             const res = await fetch(`/api/sections?id=${id}`, {method: "DELETE"});
             const data = await res.json();
-            if (res.ok) {
-                setSections((prev) => prev.filter((sec) => sec.id !== id));
-            } else {
+            if (!res.ok) {
                 console.error("Error al eliminar sección:", data.error);
+                return;
             }
+
+            // 5. Quitar la sección del estado local
+            setSections((prev) => prev.filter((sec) => sec.id !== id));
         } catch (error) {
-            console.error(error);
+            console.error("Error al eliminar sección:", error);
         }
     }
 

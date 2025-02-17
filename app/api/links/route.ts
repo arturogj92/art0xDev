@@ -1,7 +1,8 @@
 // app/api/links/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase";
+import {NextRequest, NextResponse} from "next/server";
+import {supabaseAdmin} from "@/lib/supabase";
 
+// GET: obtener lista de enlaces ordenados
 export async function GET() {
     const { data, error } = await supabaseAdmin
         .from("links")
@@ -13,6 +14,7 @@ export async function GET() {
     return NextResponse.json(data, { status: 200 });
 }
 
+// POST: crear un nuevo enlace
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
@@ -30,27 +32,45 @@ export async function POST(req: NextRequest) {
     }
 }
 
+// PATCH: reordenar en masa O actualizar un enlace individual
 export async function PATCH(req: NextRequest) {
     try {
         const body = await req.json();
+
+        // Si recibimos un array => updates masivos (ej. reordenar, reasignar section_id, etc.)
         if (Array.isArray(body)) {
-            // Reordenar en masa
-            const updates = body.map((l) =>
-                supabaseAdmin.from("links").update({ position: l.position }).eq("id", l.id)
+            // Hacemos un Promise.all para procesar cada item
+            const results = await Promise.all(
+                body.map((item) =>
+                    supabaseAdmin
+                        .from("links")
+                        .update(item)       // <-- Aquí usamos todo el objeto, para que "section_id: null" se aplique
+                        .eq("id", item.id)
+                        .select()
+                )
             );
-            const results = await Promise.all(updates);
+            // Ver si hay algún error
             const anyError = results.find((r) => r.error);
             if (anyError?.error) throw new Error(anyError.error.message);
-            return NextResponse.json({ message: "Links reordered" }, { status: 200 });
+
+            // Recopilamos la data actualizada
+            const allData = results.flatMap((r) => r.data ?? []);
+            return NextResponse.json(allData, {status: 200});
         } else {
-            // Update individual
+            // PATCH individual
             const { id, ...rest } = body;
+            if (!id) {
+                return NextResponse.json({error: "No ID provided"}, {status: 400});
+            }
+
+            // Actualizamos el enlace con los campos que nos lleguen (title, url, section_id, etc.)
             const { data, error } = await supabaseAdmin
                 .from("links")
                 .update(rest)
                 .eq("id", id)
                 .select();
             if (error) throw error;
+
             return NextResponse.json(data?.[0], { status: 200 });
         }
     } catch (error: any) {
@@ -58,6 +78,7 @@ export async function PATCH(req: NextRequest) {
     }
 }
 
+// DELETE: borrar un enlace
 export async function DELETE(req: NextRequest) {
     try {
         const { searchParams } = new URL(req.url);
@@ -65,7 +86,11 @@ export async function DELETE(req: NextRequest) {
         if (!id) {
             return NextResponse.json({ error: "Missing id" }, { status: 400 });
         }
-        const { error } = await supabaseAdmin.from("links").delete().eq("id", id);
+
+        const {error} = await supabaseAdmin
+            .from("links")
+            .delete()
+            .eq("id", id);
         if (error) throw error;
 
         return NextResponse.json({ message: "Link deleted" }, { status: 200 });
