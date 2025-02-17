@@ -58,7 +58,7 @@ function PencilIcon() {
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth="1.5"
-            stroke="currentColor"
+            stroke="black"
             className="size-5"
         >
             <path
@@ -81,7 +81,7 @@ function TrashIcon() {
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth="1.5"
-            stroke="currentColor"
+            stroke="black"
             className="size-5"
         >
             <path
@@ -226,17 +226,16 @@ export default function MultiSectionsContainer({
                         </button>
                         <button
                             onClick={() => setIsEditingSection(true)}
-                            className="bg-blue-600 text-white px-2 py-1 rounded flex items-center gap-1"
+                            className="bg-white text-white px-2 py-1 rounded flex items-center gap-1"
                         >
                             <PencilIcon/>
-                            <span className="hidden sm:inline">Editar</span>
+                            {/*<span className="hidden sm:inline">Editar</span>*/}
                         </button>
                         <button
                             onClick={handleDeleteClick}
-                            className="bg-red-600 text-white px-2 py-1 rounded flex items-center gap-1"
+                            className="bg-white text-white px-2 py-1 rounded flex items-center gap-1"
                         >
                             <TrashIcon/>
-                            <span className="hidden sm:inline">Borrar</span>
                         </button>
                     </div>
                 )}
