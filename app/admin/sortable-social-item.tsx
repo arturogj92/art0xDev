@@ -53,7 +53,7 @@ export function SortableSocialItem({social, onUpdate}: SortableSocialItemProps) 
         <li
             ref={setNodeRef}
             style={style}
-            className="border p-2 rounded flex items-center justify-left gap-2"
+            className="border p-2 rounded flex items-center justify-left gap-2 border-gray-500"
         >
             <div
                 className="cursor-grab px-2 select-none text-sm bg-gray-700 text-white rounded w-fit"
@@ -65,7 +65,7 @@ export function SortableSocialItem({social, onUpdate}: SortableSocialItemProps) 
             <div className="flex items-center gap-2">
                 {Icon && <span className="text-xl">{Icon}</span>}
                 <select
-                    className="border rounded p-1"
+                    className="border rounded p-1 border-gray-500"
                     value={social.name}
                     onChange={(e) => onUpdate(social.id, {name: e.target.value})}
                 >
@@ -77,9 +77,10 @@ export function SortableSocialItem({social, onUpdate}: SortableSocialItemProps) 
                     <option value="linkedin">LinkedIn</option>
                 </select>
             </div>
-            <div className="flex-1 flex flex-col">
-                <label className="text-sm font-medium">URL</label>
+            <div className="flex-1 flex flex-col border-gray-500">
+                <label className="text-sm font-medium text-gray-300">URL</label>
                 <Input
+                    className={"border-gray-500"}
                     value={social.url}
                     onChange={(e) => onUpdate(social.id, {url: e.target.value})}
                 />

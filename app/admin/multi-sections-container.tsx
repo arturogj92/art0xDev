@@ -169,7 +169,7 @@ export default function MultiSectionsContainer({
     }
 
     return (
-        <div ref={setNodeRef} className="border p-4 rounded bg-white/5">
+        <div ref={setNodeRef} className="border border-purple-900 p-4 rounded bg-black">
             <div className="flex items-center justify-between mb-2">
                 {isEditingSection && sec ? (
                     <div className="flex items-center gap-2">
@@ -226,14 +226,14 @@ export default function MultiSectionsContainer({
                         </button>
                         <button
                             onClick={() => setIsEditingSection(true)}
-                            className="bg-white text-white px-2 py-1 rounded flex items-center gap-1"
+                            className="bg-gray-300 text-white px-1 py-1 rounded flex items-center gap-1"
                         >
                             <PencilIcon/>
                             {/*<span className="hidden sm:inline">Editar</span>*/}
                         </button>
                         <button
                             onClick={handleDeleteClick}
-                            className="bg-white text-white px-2 py-1 rounded flex items-center gap-1"
+                            className="bg-gray-300 text-white px-1 py-1 rounded flex items-center"
                         >
                             <TrashIcon/>
                         </button>

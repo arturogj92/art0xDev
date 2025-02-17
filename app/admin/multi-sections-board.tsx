@@ -1,3 +1,6 @@
+// MultiSectionsBoard.tsx (o donde quieras colocar el botón)
+// Ajusta la ubicación exacta según tu preferencia
+
 "use client";
 
 import {useEffect, useState} from "react";
@@ -13,7 +16,7 @@ import {
     useSensor,
     useSensors,
 } from "@dnd-kit/core";
-import {arrayMove, SortableContext, verticalListSortingStrategy,} from "@dnd-kit/sortable";
+import {arrayMove, SortableContext, verticalListSortingStrategy} from "@dnd-kit/sortable";
 import {LinkData, SectionData} from "./types";
 import MultiSectionsContainer from "./multi-sections-container";
 
@@ -42,29 +45,6 @@ export default function MultiSectionsBoard({
     const [activeId, setActiveId] = useState<string | null>(null);
     const [showOverlay, setShowOverlay] = useState(false);
 
-    // NUEVO CÓDIGO
-    async function createDummySection() {
-        const dummy = {
-            title: "Nueva Sección",
-            position: sections.length,
-        };
-        try {
-            const res = await fetch("/api/sections", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify(dummy),
-            });
-            const data = await res.json();
-            if (res.ok) {
-                setSections((prev) => [...prev, data]);
-            } else {
-                console.error("Error creando sección:", data.error);
-            }
-        } catch (error) {
-            console.error("Error creando sección:", error);
-        }
-    }
-
     useEffect(() => {
         const noSectionItems = links
             .filter((l) => l.section_id === null)
@@ -72,6 +52,7 @@ export default function MultiSectionsBoard({
             .map((l) => l.id);
 
         const sortedSecs = [...sections].sort((a, b) => a.position - b.position);
+
         const sectionContainers = sortedSecs.map((sec) => {
             const secItems = links
                 .filter((l) => l.section_id === sec.id)
@@ -80,11 +61,7 @@ export default function MultiSectionsBoard({
             return { id: sec.id, items: secItems };
         });
 
-        const combined = [
-            {id: "no-section", items: noSectionItems},
-            ...sectionContainers,
-        ];
-        setContainers(combined);
+        setContainers([{id: "no-section", items: noSectionItems}, ...sectionContainers]);
     }, [links, sections]);
 
     const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
@@ -127,15 +104,12 @@ export default function MultiSectionsBoard({
         const overContainer =
             containers.find((c) => c.items.includes(over.id as string)) ||
             containers.find((c) => c.id === (over.id as string));
+
         if (!activeContainer || !overContainer) {
             setShowOverlay(false);
             return;
         }
-        if (activeContainer.id !== overContainer.id) {
-            setShowOverlay(true);
-        } else {
-            setShowOverlay(false);
-        }
+        setShowOverlay(activeContainer.id !== overContainer.id);
     }
 
     function handleDragEnd(event: DragEndEvent) {
@@ -178,7 +152,6 @@ export default function MultiSectionsBoard({
             reorderLinksInContainer(toItems);
             reorderLinksInContainer(fromItems);
         }
-
         setContainers(newContainers);
     }
 
@@ -210,6 +183,7 @@ export default function MultiSectionsBoard({
             });
             return newLinks;
         });
+
         const updates = itemIds.map((id, idx) => ({ id, position: idx }));
         await fetch("/api/links", {
             method: "PATCH",
@@ -258,6 +232,25 @@ export default function MultiSectionsBoard({
         });
     }
 
+    async function createNewSection() {
+        try {
+            const dummySection = {title: "Sección Nueva", position: sections.length};
+            const res = await fetch("/api/sections", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(dummySection),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setSections((prev) => [...prev, data]);
+            } else {
+                console.error("Error creando sección:", data.error);
+            }
+        } catch (error) {
+            console.error("Error creando sección:", error);
+        }
+    }
+
     const activeLink = activeId ? links.find((l) => l.id === activeId) : null;
 
     return (
@@ -268,7 +261,10 @@ export default function MultiSectionsBoard({
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
         >
-            <SortableContext items={containers.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+            <SortableContext
+                items={containers.map((c) => c.id)}
+                strategy={verticalListSortingStrategy}
+            >
                 <div className="flex flex-col gap-6">
                     {containers.map((container, idx) => (
                         <MultiSectionsContainer
@@ -289,22 +285,29 @@ export default function MultiSectionsBoard({
                         />
                     ))}
 
-                    {/* NUEVO CÓDIGO */}
-                    <div className="mt-4 flex justify-end">
+                    {/* Botón centrado */}
+                    <div className="flex justify-center mt-8">
                         <button
-                            onClick={createDummySection}
-                            className="bg-blue-600 text-white px-4 py-2 rounded"
+                            onClick={createNewSection}
+                            className="border border-white bg-black text-white px-4 py-2 rounded flex flex-col items-center"
                         >
-                            Crear Nueva Sección
+                            <svg
+                                className="w-6 h-6"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth={1.5}
+                                viewBox="0 0 24 24"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                            </svg>
+                            <span className="mt-1 text-sm">Nueva Sección</span>
                         </button>
                     </div>
                 </div>
             </SortableContext>
 
             <DragOverlay dropAnimation={null}>
-                {showOverlay && activeLink ? (
-                    <OverlayItem link={activeLink}/>
-                ) : null}
+                {showOverlay && activeLink ? <OverlayItem link={activeLink}/> : null}
             </DragOverlay>
         </DndContext>
     );

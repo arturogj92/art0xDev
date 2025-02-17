@@ -70,7 +70,7 @@ export default function SocialLinksPanel() {
     }
 
     return (
-        <div className="border p-4 my-8">
+        <div className="border p-4 my-8 border-purple-900">
             <h2 className="text-lg font-semibold">Social Links</h2>
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext

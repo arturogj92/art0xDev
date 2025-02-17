@@ -118,7 +118,7 @@ export default function MultiSectionsItem({
     }
 
     return (
-        <li ref={setNodeRef} style={style} className="border p-2 rounded bg-white/10">
+        <li ref={setNodeRef} style={style} className="border p-3 rounded border-gray-500">
             {isEditing ? (
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
