@@ -1,8 +1,8 @@
 "use client";
 
-import { useDroppable } from "@dnd-kit/core";
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { LinkData, SectionData } from "./types";
+import {useDroppable} from "@dnd-kit/core";
+import {SortableContext, verticalListSortingStrategy} from "@dnd-kit/sortable";
+import {LinkData, SectionData} from "./types";
 import MultiSectionsItem from "./multi-sections-item";
 
 /** Icono flecha arriba (Heroicons) */
@@ -44,6 +44,7 @@ interface MultiSectionsContainerProps {
     idx: number;  // índice en el array
     total: number; // total de contenedores
     onUpdateLink: (id: string, updates: Partial<LinkData>) => void;
+    onDeleteLink: (id: string) => void;
     onCreateLinkInSection: (sectionId: string) => void;
 }
 
@@ -57,6 +58,7 @@ export default function MultiSectionsContainer({
                                                    idx,
                                                    total,
                                                    onUpdateLink,
+                                                   onDeleteLink,
                                                    onCreateLinkInSection,
                                                }: MultiSectionsContainerProps) {
     // droppable => permitir soltar enlaces
@@ -120,7 +122,8 @@ export default function MultiSectionsContainer({
                 <ul className="space-y-2">
                     {linkObjects.map((link) => {
                         if (!link) return null;
-                        return <MultiSectionsItem key={link.id} link={link} onUpdateLink={onUpdateLink} />;
+                        return <MultiSectionsItem key={link.id} link={link} onUpdateLink={onUpdateLink}
+                                                  onDeleteLink={onDeleteLink}/>;
                     })}
                 </ul>
             </SortableContext>

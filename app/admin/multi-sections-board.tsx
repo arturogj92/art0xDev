@@ -1,23 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 import {
+    closestCenter,
     DndContext,
-    DragStartEvent,
     DragEndEvent,
-    PointerSensor,
+    DragOverlay,
+    DragStartEvent,
     KeyboardSensor,
+    PointerSensor,
     useSensor,
     useSensors,
-    closestCenter,
-    DragOverlay,
 } from "@dnd-kit/core";
-import {
-    SortableContext,
-    verticalListSortingStrategy,
-    arrayMove,
-} from "@dnd-kit/sortable";
-import { LinkData, SectionData } from "./types";
+import {arrayMove, SortableContext, verticalListSortingStrategy,} from "@dnd-kit/sortable";
+import {LinkData, SectionData} from "./types";
 import MultiSectionsContainer from "./multi-sections-container";
 
 interface MultiSectionsBoardProps {
@@ -25,7 +21,8 @@ interface MultiSectionsBoardProps {
     setLinks: React.Dispatch<React.SetStateAction<LinkData[]>>;
     sections: SectionData[];
     setSections: React.Dispatch<React.SetStateAction<SectionData[]>>;
-    onUpdateLink: (id: string, updates: Partial<LinkData>) => void; // <-- NUEVO PROP
+    onUpdateLink: (id: string, updates: Partial<LinkData>) => void;
+    onDeleteLink: (id: string) => void;
 }
 
 export default function MultiSectionsBoard({
@@ -34,6 +31,7 @@ export default function MultiSectionsBoard({
                                                sections,
                                                setSections,
                                                onUpdateLink,
+                                               onDeleteLink,
                                            }: MultiSectionsBoardProps) {
     const [containers, setContainers] = useState<{ id: string; items: string[] }[]>([]);
     const [activeId, setActiveId] = useState<string | null>(null);
@@ -258,6 +256,7 @@ export default function MultiSectionsBoard({
                             idx={idx}
                             total={containers.length}
                             onUpdateLink={onUpdateLink}
+                            onDeleteLink={onDeleteLink}
                             onCreateLinkInSection={createLinkInSection}
                         />
                     ))}

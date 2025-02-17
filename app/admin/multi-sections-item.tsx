@@ -1,21 +1,23 @@
 "use client";
 
-import { CSS } from "@dnd-kit/utilities";
-import { useSortable } from "@dnd-kit/sortable";
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { LinkData } from "./types";
+import {CSS} from "@dnd-kit/utilities";
+import {useSortable} from "@dnd-kit/sortable";
+import React, {useState} from "react";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {Switch} from "@/components/ui/switch";
+import {LinkData} from "./types";
 
 interface MultiSectionsItemProps {
     link: LinkData;
     onUpdateLink: (id: string, updates: Partial<LinkData>) => void;
+    onDeleteLink: (id: string) => void;
 }
 
 export default function MultiSectionsItem({
                                               link,
                                               onUpdateLink,
+                                              onDeleteLink,
                                           }: MultiSectionsItemProps) {
     // Lógica de arrastre
     const {
@@ -36,12 +38,23 @@ export default function MultiSectionsItem({
 
     const [isEditing, setIsEditing] = useState(false);
 
-    // Campos en modo edición
     const [editTitle, setEditTitle] = useState(link.title);
     const [editUrl, setEditUrl] = useState(link.url);
     const [editImage, setEditImage] = useState(link.image ?? "");
-    // El toggle “visible” se sacará del modo edición. Se quita de aquí o se mantiene si deseas.
-    // Si deseas mantenerlo editable también en modo edición, podrías duplicar la lógica.
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    function handleDeleteClick() {
+        setShowDeleteModal(true);
+    }
+
+    function confirmDelete() {
+        setShowDeleteModal(false);
+        onDeleteLink(link.id);
+    }
+
+    function cancelDelete() {
+        setShowDeleteModal(false);
+    }
 
     function handleSave() {
         onUpdateLink(link.id, {
@@ -141,6 +154,24 @@ export default function MultiSectionsItem({
                             onCheckedChange={toggleVisible}
                         />
                         <Button onClick={() => setIsEditing(true)}>Editar</Button>
+                        <Button variant="destructive" onClick={handleDeleteClick}>
+                            Borrar
+                        </Button>
+                    </div>
+                </div>
+            )}
+            {showDeleteModal && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+                    <div className="bg-black p-4 rounded shadow">
+                        <p className="mb-4">¿Seguro que deseas borrar este enlace?</p>
+                        <div className="flex justify-end gap-2">
+                            <Button variant="secondary" onClick={cancelDelete}>
+                                Cancelar
+                            </Button>
+                            <Button variant="destructive" onClick={confirmDelete}>
+                                Borrar
+                            </Button>
+                        </div>
                     </div>
                 </div>
             )}

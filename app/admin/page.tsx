@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { LinkData, SectionData } from "./types";
-import { CreationForm } from "./creation-form";
+import {useEffect, useState} from "react";
+import {LinkData, SectionData} from "./types";
 import MultiSectionsBoard from "./multi-sections-board";
 import SocialLinksPanel from "@/app/admin/social-links-panel";
 
@@ -42,6 +41,23 @@ export default function AdminPage() {
             })
             .catch((err) => console.error(err));
     }, []);
+
+
+    async function handleDeleteLink(id: string) {
+        try {
+            const res = await fetch(`/api/links?id=${id}`, {
+                method: "DELETE",
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setLinks((prev) => prev.filter((l) => l.id !== id));
+            } else {
+                console.error("Error al eliminar link:", data.error);
+            }
+        } catch (error) {
+            console.error("Error al eliminar link:", error);
+        }
+    }
 
 
     async function handleUpdateLink(id: string, updates: Partial<LinkData>) {
@@ -103,6 +119,7 @@ export default function AdminPage() {
                 sections={sections}
                 setSections={setSections}
                 onUpdateLink={handleUpdateLink}
+                onDeleteLink={handleDeleteLink}
             />
 
             <SocialLinksPanel />
