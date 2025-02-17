@@ -9,19 +9,7 @@ export default function AdminPage() {
     const [links, setLinks] = useState<LinkData[]>([]);
     const [sections, setSections] = useState<SectionData[]>([]);
 
-    // Estado para crear link
-    const [newLink, setNewLink] = useState<Omit<LinkData, "id">>({
-        title: "",
-        url: "",
-        image: "",
-        visible: true,
-        position: 0,
-        section_id: null,
-    });
-
-    // Carga inicial
     useEffect(() => {
-        // Cargar links
         fetch("/api/links")
             .then((res) => res.json())
             .then((data) => {
@@ -31,7 +19,6 @@ export default function AdminPage() {
             })
             .catch((err) => console.error(err));
 
-        // Cargar sections
         fetch("/api/sections")
             .then((res) => res.json())
             .then((data) => {
@@ -42,12 +29,9 @@ export default function AdminPage() {
             .catch((err) => console.error(err));
     }, []);
 
-
     async function handleDeleteLink(id: string) {
         try {
-            const res = await fetch(`/api/links?id=${id}`, {
-                method: "DELETE",
-            });
+            const res = await fetch(`/api/links?id=${id}`, {method: "DELETE"});
             const data = await res.json();
             if (res.ok) {
                 setLinks((prev) => prev.filter((l) => l.id !== id));
@@ -58,7 +42,6 @@ export default function AdminPage() {
             console.error("Error al eliminar link:", error);
         }
     }
-
 
     async function handleUpdateLink(id: string, updates: Partial<LinkData>) {
         try {
@@ -80,28 +63,34 @@ export default function AdminPage() {
         }
     }
 
-    // ========== CREAR LINK ==========
-    async function handleCreate() {
+    async function handleUpdateSection(id: string, updates: Partial<SectionData>) {
         try {
-            const res = await fetch("/api/links", {
-                method: "POST",
+            const res = await fetch("/api/sections", {
+                method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(newLink),
+                body: JSON.stringify({id, ...updates}),
             });
             const data = await res.json();
-
             if (res.ok) {
-                setLinks((prev) => [...prev, data]);
-                setNewLink({
-                    title: "",
-                    url: "",
-                    image: "",
-                    visible: true,
-                    position: 0,
-                    section_id: null,
-                });
+                setSections((prev) =>
+                    prev.map((sec) => (sec.id === id ? {...sec, ...data} : sec))
+                );
             } else {
-                console.error("Error al crear link:", data.error);
+                console.error("Error al actualizar sección:", data.error);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    async function handleDeleteSection(id: string) {
+        try {
+            const res = await fetch(`/api/sections?id=${id}`, {method: "DELETE"});
+            const data = await res.json();
+            if (res.ok) {
+                setSections((prev) => prev.filter((sec) => sec.id !== id));
+            } else {
+                console.error("Error al eliminar sección:", data.error);
             }
         } catch (error) {
             console.error(error);
@@ -112,7 +101,6 @@ export default function AdminPage() {
         <div className="p-4">
             <h1 className="text-2xl font-bold mb-4">Panel de Administración (Editables)</h1>
 
-            {/* Board para reordenar enlaces (drag & drop) */}
             <MultiSectionsBoard
                 links={links}
                 setLinks={setLinks}
@@ -120,6 +108,8 @@ export default function AdminPage() {
                 setSections={setSections}
                 onUpdateLink={handleUpdateLink}
                 onDeleteLink={handleDeleteLink}
+                onUpdateSection={handleUpdateSection}
+                onDeleteSection={handleDeleteSection}
             />
 
             <SocialLinksPanel />
