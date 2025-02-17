@@ -2,13 +2,13 @@
 
 import {useEffect, useState} from "react";
 import {
-    closestCenter,
     DndContext,
     DragEndEvent,
     DragOverlay,
     DragStartEvent,
     KeyboardSensor,
     PointerSensor,
+    rectIntersection,
     useSensor,
     useSensors,
 } from "@dnd-kit/core";
@@ -234,7 +234,7 @@ export default function MultiSectionsBoard({
     return (
         <DndContext
             sensors={sensors}
-            collisionDetection={closestCenter}
+            collisionDetection={rectIntersection}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
         >
