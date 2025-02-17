@@ -46,12 +46,13 @@ export default function MultiSectionsBoard({
         // Por cada sección, generamos un contenedor con sus enlaces
         const sectionContainers = sortedSecs.map((sec) => {
             const secItems = links
-                .filter((l) => !l.pinned && l.section_id === sec.id)
+                .filter((l) => l.section_id === sec.id)   // <-- FILTRO
                 .sort((a, b) => a.position - b.position)
                 .map((l) => l.id);
 
             return { id: sec.id, items: secItems };
         });
+
 
         // Asignamos al estado
         setContainers(sectionContainers);
@@ -125,14 +126,13 @@ export default function MultiSectionsBoard({
             const link = newLinks.find((l) => l.id === linkId);
             if (link) {
                 link.section_id = section_id;
-                link.pinned = false;
             }
             return newLinks;
         });
         await fetch("/api/links", {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: linkId, pinned: false, section_id }),
+            body: JSON.stringify({ id: linkId, section_id }),
         });
     }
 

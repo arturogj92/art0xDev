@@ -14,7 +14,6 @@ export interface LinkData {
     url: string;
     image?: string;
     visible: boolean;
-    pinned: boolean;
     position: number;
     section_id?: string | null;
 }

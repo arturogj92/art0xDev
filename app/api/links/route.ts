@@ -6,7 +6,6 @@ export async function GET() {
     const { data, error } = await supabaseAdmin
         .from("links")
         .select("*")
-        .order("pinned", { ascending: false }) // pinned primero
         .order("position", { ascending: true });
     if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 });
@@ -17,11 +16,11 @@ export async function GET() {
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { title, url, image, visible, pinned, position, section_id } = body;
+        const { title, url, image, visible, position, section_id } = body;
 
         const { data, error } = await supabaseAdmin
             .from("links")
-            .insert([{ title, url, image, visible, pinned, position, section_id }])
+            .insert([{ title, url, image, visible, position, section_id }])
             .select();
         if (error) throw error;
 

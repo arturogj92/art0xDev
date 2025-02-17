@@ -47,15 +47,7 @@ export function CreationForm({
                     }
                 />
             </div>
-            <div className="flex items-center gap-2">
-                <label className="text-sm">Pinned:</label>
-                <Switch
-                    checked={newLink.pinned}
-                    onCheckedChange={(checked) =>
-                        setNewLink({ ...newLink, pinned: checked })
-                    }
-                />
-            </div>
+
 
             {/* SELECT DE SECCIONES */}
             <div className="flex items-center gap-2">

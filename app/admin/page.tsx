@@ -16,7 +16,6 @@ export default function AdminPage() {
         url: "",
         image: "",
         visible: true,
-        pinned: false,
         position: 0,
         section_id: null,
     });
@@ -82,7 +81,6 @@ export default function AdminPage() {
                     url: "",
                     image: "",
                     visible: true,
-                    pinned: false,
                     position: 0,
                     section_id: null,
                 });
