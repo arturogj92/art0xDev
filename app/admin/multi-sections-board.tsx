@@ -25,7 +25,6 @@ interface MultiSectionsBoardProps {
 
     onUpdateLink: (id: string, updates: Partial<LinkData>) => void;
     onDeleteLink: (id: string) => void;
-
     onUpdateSection: (id: string, updates: Partial<SectionData>) => void;
     onDeleteSection: (id: string) => void;
 }
@@ -45,6 +44,13 @@ export default function MultiSectionsBoard({
     const [showOverlay, setShowOverlay] = useState(false);
 
     useEffect(() => {
+        // 1. Sección "no-section": todos los links con section_id=null
+        const noSectionItems = links
+            .filter((l) => l.section_id === null)
+            .sort((a, b) => a.position - b.position)
+            .map((l) => l.id);
+
+        // 2. Secciones reales
         const sortedSecs = [...sections].sort((a, b) => a.position - b.position);
 
         const sectionContainers = sortedSecs.map((sec) => {
@@ -56,11 +62,18 @@ export default function MultiSectionsBoard({
             return { id: sec.id, items: secItems };
         });
 
-        setContainers(sectionContainers);
+        // 3. Unimos "no-section" + secciones
+        const combined = [
+            {id: "no-section", items: noSectionItems}, // primer contenedor
+            ...sectionContainers, // resto
+        ];
+
+        setContainers(combined);
     }, [links, sections]);
 
     const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
 
+    // Crear link dummy en una sección
     async function createLinkInSection(sectionId: string) {
         const dummyLink = {
             title: "Nuevo Enlace",
@@ -68,7 +81,7 @@ export default function MultiSectionsBoard({
             image: "",
             visible: true,
             position: 0,
-            section_id: sectionId,
+            section_id: sectionId === "no-section" ? null : sectionId,
         };
         try {
             const res = await fetch("/api/links", {
@@ -87,6 +100,7 @@ export default function MultiSectionsBoard({
         }
     }
 
+    // DRAG & DROP para enlaces
     function handleDragStart(event: DragStartEvent) {
         setActiveId(event.active.id as string);
         setShowOverlay(false);
@@ -96,9 +110,7 @@ export default function MultiSectionsBoard({
         const {active, over} = event;
         if (!over) return;
 
-        const activeContainer = containers.find((c) =>
-            c.items.includes(active.id as string)
-        );
+        const activeContainer = containers.find((c) => c.items.includes(active.id as string));
         const overContainer =
             containers.find((c) => c.items.includes(over.id as string)) ||
             containers.find((c) => c.id === (over.id as string));
@@ -121,9 +133,7 @@ export default function MultiSectionsBoard({
         setShowOverlay(false);
         if (!over) return;
 
-        const activeContainer = containers.find((c) =>
-            c.items.includes(active.id as string)
-        );
+        const activeContainer = containers.find((c) => c.items.includes(active.id as string));
         const overContainer =
             containers.find((c) => c.items.includes(over.id as string)) ||
             containers.find((c) => c.id === (over.id as string));
@@ -148,10 +158,12 @@ export default function MultiSectionsBoard({
         }
 
         if (activeContainer.id === overContainer.id) {
+            // Reordenar en la misma "sección"
             const reordered = arrayMove(fromItems, oldIndex, newIndex);
             newContainers[fromIndex].items = reordered;
             reorderLinksInContainer(reordered);
         } else {
+            // Mover a otro contenedor
             fromItems.splice(oldIndex, 1);
             toItems.splice(newIndex, 0, active.id as string);
 
@@ -165,18 +177,22 @@ export default function MultiSectionsBoard({
     }
 
     async function updateLinkContainer(linkId: string, containerId: string) {
+        // containerId "no-section" => section_id=null
+        const newSectionId = containerId === "no-section" ? null : containerId;
+
         setLinks((prev) => {
             const newLinks = structuredClone(prev);
             const link = newLinks.find((l) => l.id === linkId);
             if (link) {
-                link.section_id = containerId;
+                link.section_id = newSectionId;
             }
             return newLinks;
         });
+
         await fetch("/api/links", {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({id: linkId, section_id: containerId}),
+            body: JSON.stringify({id: linkId, section_id: newSectionId}),
         });
     }
 
@@ -191,6 +207,7 @@ export default function MultiSectionsBoard({
             });
             return newLinks;
         });
+
         const updates = itemIds.map((id, idx) => ({ id, position: idx }));
         await fetch("/api/links", {
             method: "PATCH",
@@ -199,7 +216,7 @@ export default function MultiSectionsBoard({
         });
     }
 
-    // ========== REORDENAR SECCIONES (si mantienes flechas) ==========
+    // Reordenar secciones (flechas)
     function moveSectionUp(sectionId: string) {
         setSections((prev) => {
             const idx = prev.findIndex((s) => s.id === sectionId);
@@ -240,7 +257,7 @@ export default function MultiSectionsBoard({
         });
     }
 
-    // Overlay de drag
+    // Overlay
     const activeLink = activeId ? links.find((l) => l.id === activeId) : null;
 
     return (
@@ -270,6 +287,8 @@ export default function MultiSectionsBoard({
                             onUpdateLink={onUpdateLink}
                             onDeleteLink={onDeleteLink}
                             onCreateLinkInSection={createLinkInSection}
+
+                            // Pasamos props para editar/borrar secciones
                             onUpdateSection={onUpdateSection}
                             onDeleteSection={onDeleteSection}
                         />
@@ -278,15 +297,12 @@ export default function MultiSectionsBoard({
             </SortableContext>
 
             <DragOverlay dropAnimation={null}>
-                {showOverlay && activeLink ? (
-                    <OverlayItem link={activeLink}/>
-                ) : null}
+                {showOverlay && activeLink ? <OverlayItem link={activeLink}/> : null}
             </DragOverlay>
         </DndContext>
     );
 }
 
-// Pequeño componente para el overlay
 function OverlayItem({link}: { link: LinkData }) {
     return (
         <div className="cursor-grab text-sm text-gray-300 bg-gray-700 rounded px-2 p-2">

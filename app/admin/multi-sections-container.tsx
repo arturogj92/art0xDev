@@ -6,7 +6,6 @@ import {SortableContext, verticalListSortingStrategy} from "@dnd-kit/sortable";
 import {LinkData, SectionData} from "./types";
 import MultiSectionsItem from "./multi-sections-item";
 
-// Botones/íconos
 function AddLink() {
     return (
         <svg
@@ -52,8 +51,6 @@ function ArrowDownIcon() {
         </svg>
     );
 }
-
-// NUEVOS ICONOS
 function PencilIcon() {
     return (
         <svg
@@ -77,7 +74,6 @@ function PencilIcon() {
         </svg>
     );
 }
-
 function TrashIcon() {
     return (
         <svg
@@ -102,15 +98,18 @@ interface MultiSectionsContainerProps {
     items: string[];
     links: LinkData[];
     sections: SectionData[];
+
     moveSectionUp: (sectionId: string) => void;
     moveSectionDown: (sectionId: string) => void;
+
     idx: number;
     total: number;
+
     onUpdateLink: (id: string, updates: Partial<LinkData>) => void;
     onDeleteLink: (id: string) => void;
     onCreateLinkInSection: (sectionId: string) => void;
 
-    // NUEVO: para editar y borrar sección
+    // Para editar/borrar la sección
     onUpdateSection: (id: string, updates: Partial<SectionData>) => void;
     onDeleteSection: (id: string) => void;
 }
@@ -128,15 +127,16 @@ export default function MultiSectionsContainer({
                                                    onDeleteLink,
                                                    onCreateLinkInSection,
 
-                                                   // NUEVO
                                                    onUpdateSection,
                                                    onDeleteSection,
                                                }: MultiSectionsContainerProps) {
     const { setNodeRef } = useDroppable({ id: containerId });
 
+    // Si containerId === "no-section", es la sección "Sin Sección"
+    const isNoSection = containerId === "no-section";
+
     // Buscar la sección real
     const sec = sections.find((s) => s.id === containerId);
-    const isNoSection = containerId === "no-section";
 
     // Lógica flechas
     const hideUp = idx === 0;
@@ -145,84 +145,97 @@ export default function MultiSectionsContainer({
     // Convertir items a LinkData
     const linkObjects = items.map((id) => links.find((l) => l.id === id)).filter(Boolean);
 
-    // ESTADOS para editar SECCIÓN
+    // Estado para editar la sección
     const [isEditingSection, setIsEditingSection] = useState(false);
     const [editTitle, setEditTitle] = useState(sec?.title || "");
 
-    // ESTADO para borrar SECCIÓN
+    // Modal de borrado
     const [showDeleteModalSection, setShowDeleteModalSection] = useState(false);
 
-    // Si la sección cambia, recargamos el título en editTitle
+    // Si la sección cambia, recargamos el título
     useEffect(() => {
         if (sec) {
             setEditTitle(sec.title);
         }
     }, [sec]);
 
-    // Guardar sección
     function handleSaveSection() {
         if (!sec) return;
         onUpdateSection(sec.id, {title: editTitle});
         setIsEditingSection(false);
     }
 
-    // Cancelar edición
     function handleCancelSection() {
         if (!sec) return;
         setIsEditingSection(false);
         setEditTitle(sec.title);
     }
 
-    // Borrar sección => abrir modal
     function handleDeleteClick() {
         setShowDeleteModalSection(true);
     }
-
     function confirmDeleteSection() {
         setShowDeleteModalSection(false);
         if (sec) {
             onDeleteSection(sec.id);
         }
     }
-
     function cancelDeleteSection() {
         setShowDeleteModalSection(false);
     }
 
+    // Render del título
+    let titleContent: React.ReactNode = "Sin Sección";
+    if (isNoSection) {
+        // "Sin Sección"
+        titleContent = "Sin Sección";
+    } else if (sec) {
+        if (isEditingSection) {
+            // Modo edición
+            titleContent = (
+                <div className="flex items-center gap-2">
+                    <input
+                        className="border rounded p-1"
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                    />
+                    <button
+                        onClick={handleSaveSection}
+                        className="bg-green-600 text-white px-2 py-1 rounded"
+                    >
+                        Guardar
+                    </button>
+                    <button
+                        onClick={handleCancelSection}
+                        className="bg-gray-400 text-white px-2 py-1 rounded"
+                    >
+                        Cancelar
+                    </button>
+                </div>
+            );
+        } else {
+            // Modo lectura
+            titleContent = sec.title;
+        }
+    }
+
     return (
         <div ref={setNodeRef} className="border p-4 rounded bg-white/5">
-            {/* Encabezado de la sección */}
             <div className="flex items-center justify-between mb-2">
-                {isEditingSection && sec ? (
-                    // === MODO EDICIÓN DE SECCIÓN ===
-                    <div className="flex items-center gap-2">
-                        <input
-                            className="border rounded p-1"
-                            value={editTitle}
-                            onChange={(e) => setEditTitle(e.target.value)}
-                        />
-                        <button
-                            onClick={handleSaveSection}
-                            className="bg-green-600 text-white px-2 py-1 rounded"
-                        >
-                            Guardar
-                        </button>
-                        <button
-                            onClick={handleCancelSection}
-                            className="bg-gray-400 text-white px-2 py-1 rounded"
-                        >
-                            Cancelar
-                        </button>
-                    </div>
-                ) : (
-                    <h3 className="font-semibold text-lg">
-                        {sec ? sec.title : "Sin Sección"}
-                    </h3>
-                )}
+                <h3 className="font-semibold text-lg">{titleContent}</h3>
 
-                {!isNoSection && sec && !isEditingSection && (
+                {/* Botones de la barra de la sección */}
+                {isNoSection ? (
+                    // Sección especial "Sin Sección": no se edita ni se borra
+                    <button
+                        onClick={() => onCreateLinkInSection("no-section")}
+                        className="bg-black text-white rounded p-1 flex items-center gap-1"
+                    >
+                        <AddLink/>
+                        <span className="hidden sm:inline">Link</span>
+                    </button>
+                ) : sec && !isEditingSection ? (
                     <div className="flex items-center gap-2">
-                        {/* Flechas */}
                         {!hideUp && (
                             <button
                                 onClick={() => moveSectionUp(sec.id)}
@@ -241,8 +254,6 @@ export default function MultiSectionsContainer({
                                 <ArrowDownIcon/>
                             </button>
                         )}
-
-                        {/* Botón crear link */}
                         <button
                             onClick={() => onCreateLinkInSection(sec.id)}
                             className="bg-black text-white rounded p-1 flex items-center gap-1"
@@ -250,8 +261,7 @@ export default function MultiSectionsContainer({
                             <AddLink/>
                             <span className="hidden sm:inline">Link</span>
                         </button>
-
-                        {/* Botón editar sección */}
+                        {/* Editar sección */}
                         <button
                             onClick={() => setIsEditingSection(true)}
                             className="bg-blue-600 text-white px-2 py-1 rounded flex items-center gap-1"
@@ -259,8 +269,7 @@ export default function MultiSectionsContainer({
                             <PencilIcon/>
                             <span className="hidden sm:inline">Editar</span>
                         </button>
-
-                        {/* Botón borrar sección */}
+                        {/* Borrar sección */}
                         <button
                             onClick={handleDeleteClick}
                             className="bg-red-600 text-white px-2 py-1 rounded flex items-center gap-1"
@@ -269,10 +278,9 @@ export default function MultiSectionsContainer({
                             <span className="hidden sm:inline">Borrar</span>
                         </button>
                     </div>
-                )}
+                ) : null}
             </div>
 
-            {/* Lista de enlaces */}
             <SortableContext items={items} strategy={verticalListSortingStrategy}>
                 <ul className="space-y-2">
                     {linkObjects.map((link) => {
@@ -293,7 +301,7 @@ export default function MultiSectionsContainer({
                 <p className="text-sm text-gray-400">Arrastra aquí enlaces para asignar</p>
             )}
 
-            {/* MODAL de confirmación para borrar sección */}
+            {/* Modal de confirmación para borrar la sección */}
             {showDeleteModalSection && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
                     <div className="bg-black w-full max-w-sm mx-auto p-4 rounded shadow-lg">
