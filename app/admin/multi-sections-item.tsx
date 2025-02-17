@@ -185,9 +185,11 @@ export default function MultiSectionsItem({
                 </div>
             )}
             {showDeleteModal && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-                    <div className="bg-black p-4 rounded shadow">
-                        <p className="mb-4">¿Seguro que deseas borrar este enlace?</p>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                    <div className="bg-black w-full max-w-sm mx-auto p-4 rounded shadow-lg">
+                        <p className="mb-4">
+                            ¿Seguro que deseas borrar este enlace?
+                        </p>
                         <div className="flex justify-end gap-2">
                             <Button variant="secondary" onClick={cancelDelete}>
                                 Cancelar
@@ -199,6 +201,7 @@ export default function MultiSectionsItem({
                     </div>
                 </div>
             )}
+
         </li>
     );
 }
