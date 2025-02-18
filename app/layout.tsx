@@ -6,7 +6,7 @@ import "./globals.css";
 // Carga la fuente, opcionalmente indicando subsets, weights, styles
 const dmSans = DM_Sans({
     subsets: ['latin'],   // o ['latin', 'latin-ext'] etc.
-    weight: ['400', '500', '700'], // pesos que uses
+    weight: ['400'], // pesos que uses
     variable: '--font-dm-sans',  // para usarla como variable CSS
     display: 'swap',      // recomendación de Google
 });
@@ -30,9 +30,10 @@ export default function RootLayout({
                                        children,
                                    }: Readonly<{ children: React.ReactNode }>) {
     return (
-        <html lang="en" suppressHydrationWarning>
+        <html lang="en" suppressHydrationWarning
+              className={`${geistSans.variable} ${geistMono.variable} ${dmSans.variable} antialiased`}>
         <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+
         >
         {/* Theme provider wraps the entire app */}
         <ThemeProvider
