@@ -1,7 +1,7 @@
 "use client";
 
-import { CardContent } from "@/components/ui/card";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import {CardContent} from "@/components/ui/card";
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import TypewriterText from "@/components/typewritertext/typewriter-text";
 
 interface HeaderProps {
@@ -15,7 +15,7 @@ export default function Header({ name, role, description, profileImage }: Header
     return (
         <CardContent className="mt-20 p-4 flex flex-col items-center text-center">
             <Avatar className="w-36 h-36">
-                <AvatarImage src={profileImage} alt={name} />
+                <AvatarImage src={profileImage} alt={name}/>
                 <AvatarFallback>{name.charAt(0)}</AvatarFallback>
             </Avatar>
 
@@ -23,10 +23,22 @@ export default function Header({ name, role, description, profileImage }: Header
                 {name} · {role}
             </h1>
 
-            {/* Aquí usamos Typewriter para animar la descripción */}
-            {/*<p className="mt-2 text-1xl text-white text-center">*/}
-                <TypewriterText text={description} />
-            {/*</p>*/}
+            <p
+                className="
+    mt-2
+    text-xs       /* tamaño de fuente mínimo para pantallas muy pequeñas */
+    sm:text-sm    /* en pantallas >= sm sube a text-sm */
+    md:text-base  /* en pantallas >= md sube a text-base */
+    text-white
+    text-center
+    break-words   /* fuerza a romper palabras si no caben */
+    sm:max-w-[25rem]
+    leading-tight /* reduce un poco el interlineado */
+  "
+            >
+                <TypewriterText text={description}/>
+            </p>
+
         </CardContent>
     );
 }

@@ -67,12 +67,15 @@ export default function MultiSectionsBoard({
     const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
 
     async function createLinkInSection(sectionId: string) {
+        const container = containers.find((c) => c.id === sectionId);
+        const newPos = container ? container.items.length : 0;
+
         const dummyLink = {
             title: "Nuevo Enlace",
             url: "",
             image: "",
             visible: true,
-            position: 0,
+            position: newPos,
             section_id: sectionId === "no-section" ? null : sectionId,
         };
         try {
