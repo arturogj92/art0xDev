@@ -1,3 +1,4 @@
+// app/admin/page.tsx
 "use client";
 
 import {useEffect, useState} from "react";
@@ -8,12 +9,9 @@ import SocialLinksPanel from "./social-links-panel";
 export default function AdminPage() {
     const [links, setLinks] = useState<LinkData[]>([]);
     const [sections, setSections] = useState<SectionData[]>([]);
-
-    // Para refrescar un <iframe> si lo deseas:
     const [refreshCount, setRefreshCount] = useState(0);
 
     useEffect(() => {
-        // Cargar enlaces
         fetch("/api/links")
             .then((res) => res.json())
             .then((data) => {
@@ -21,7 +19,6 @@ export default function AdminPage() {
             })
             .catch((err) => console.error(err));
 
-        // Cargar secciones
         fetch("/api/sections")
             .then((res) => res.json())
             .then((data) => {
@@ -30,7 +27,6 @@ export default function AdminPage() {
             .catch((err) => console.error(err));
     }, []);
 
-    // ======= Funciones Links =======
     async function handleDeleteLink(id: string) {
         try {
             const res = await fetch(`/api/links?id=${id}`, {method: "DELETE"});
@@ -67,7 +63,6 @@ export default function AdminPage() {
         }
     }
 
-    // ======= Funciones Secciones =======
     async function handleUpdateSection(id: string, updates: Partial<SectionData>) {
         try {
             const res = await fetch("/api/sections", {
@@ -91,10 +86,12 @@ export default function AdminPage() {
 
     async function handleDeleteSection(id: string) {
         try {
-            // Reasignar links => null
             const linksToReassign = links.filter((l) => l.section_id === id);
             if (linksToReassign.length > 0) {
-                const updates = linksToReassign.map((ln) => ({id: ln.id, section_id: null}));
+                const updates = linksToReassign.map((ln) => ({
+                    id: ln.id,
+                    section_id: null,
+                }));
                 const patchRes = await fetch("/api/links", {
                     method: "PATCH",
                     headers: {"Content-Type": "application/json"},
@@ -102,14 +99,14 @@ export default function AdminPage() {
                 });
                 const patchData = await patchRes.json();
                 if (!patchRes.ok) {
-                    console.error("Error reasignando links:", patchData.error);
+                    console.error("Error reasignando links en backend:", patchData.error);
                 }
             }
             setLinks((prev) =>
-                prev.map((link) => (link.section_id === id ? {...link, section_id: null} : link))
+                prev.map((link) =>
+                    link.section_id === id ? {...link, section_id: null} : link
+                )
             );
-
-            // Borrar sección
             const res = await fetch(`/api/sections?id=${id}`, {method: "DELETE"});
             const data = await res.json();
             if (!res.ok) {
@@ -117,18 +114,16 @@ export default function AdminPage() {
                 return;
             }
             setSections((prev) => prev.filter((sec) => sec.id !== id));
-
             setRefreshCount((c) => c + 1);
         } catch (error) {
             console.error("Error al eliminar sección:", error);
         }
     }
 
-    // ======= Render =======
     return (
-        <div className="flex w-full">
-            {/* Columna izquierda (scrollable) */}
-            <div className="flex-[17] h-screen overflow-y-auto p-4 border-r border-gray-600">
+        <div className="flex flex-col md:flex-row min-h-screen">
+            {/* Panel izquierdo */}
+            <div className="md:w-[56.666%] p-4 border-b md:border-b-0 md:border-r border-gray-600">
                 <h1 className="text-2xl font-bold mb-4">Panel de Administración</h1>
 
                 <MultiSectionsBoard
@@ -140,30 +135,74 @@ export default function AdminPage() {
                     onDeleteLink={handleDeleteLink}
                     onUpdateSection={handleUpdateSection}
                     onDeleteSection={handleDeleteSection}
-                    onLinksReordered={() => setRefreshCount((c) => c + 1)} // Forzar recarga iframe
+                    // onLinksReordered={() => setRefreshCount((c) => c + 1)} // Si quieres refrescar la preview al mover
                 />
 
                 <SocialLinksPanel/>
             </div>
 
-            {/* Columna derecha (fija y centrada verticalmente) */}
-            <div className="flex-[13] bg-black h-screen sticky top-0 flex flex-col items-center justify-center">
+            {/* Panel derecho */}
+            <div className="
+        flex-[13]
+        bg-black
+        md:sticky
+        md:top-0
+        h-screen
+        flex flex-col
+        items-center
+        justify-center
+      "
+            >
                 <div className="text-white p-2 rounded mb-4 w-full text-center">
                     <p className="font-bold">PREVIEW</p>
                 </div>
 
-                {/* iPhone frame + iframe */}
-                <div className="relative w-[330px] h-[550px] text-xs scale-90">
+                {/*
+          Contenedor para mostrar la imagen 590x1196 a la mitad => 295x598
+          con scale=1 (si quieres tal cual), o “real” => 590x1196 con scale=0.5
+          Lo importante es que "coincidan" contenedor e imagen.
+        */}
+                <div
+                    className="
+            relative
+            w-[300px]  /* mitad de 590 */
+            h-[598px]  /* mitad de 1196 */
+            /* si quieres ajustarlo más grande/pequeño, puedes scale o cambiar w/h */
+            scale-[1] /* mitad de 1 */
+          "
+                >
+                    {/* Imagen iPhone => 590x1196 (metida a la mitad) */}
                     <img
                         src="/images/iphone16-frame.png"
                         alt="iPhone frame"
                         className="absolute w-full h-full z-20 pointer-events-none"
                     />
+
+                    {/*
+            "Pantalla" interna.
+            Ajusta top, left, width, height a la mitad también.
+            Ej: supongamos la pantalla real está a top=100, left=20 y mide 550x1000
+            => la mitad es top=50, left=10, w=275, h=500
+            Esto es un ejemplo, tendrás que ir probando.
+          */}
                     <div
-                        className="absolute top-[12px] left-[5px] w-[320px] h-[530px] z-10 overflow-y-auto bg-black rounded-3xl">
+                        className="
+              absolute
+              top-[5px]   /* EJEMPLO, la mitad de 120 */
+              left-[0px]  /* EJEMPLO, la mitad de 30 */
+              w-[300px]    /* EJEMPLO, la mitad de 530 */
+              h-[598px]    /* EJEMPLO, la mitad de 1000 */
+              z-10
+              pt-4
+              pb-4
+              overflow-y-auto
+              bg-black
+              rounded-[80px] /* para redondear esquinas */
+            "
+                    >
                         <iframe
                             key={refreshCount}
-                            src={`/?r=${refreshCount}`} // Para forzar recarga
+                            src={`/?r=${refreshCount}`}
                             className="w-full h-full border-0"
                         />
                     </div>

@@ -92,38 +92,30 @@ export default function MultiSectionsItem({
         });
         setIsEditing(false);
     }
-
     function handleCancel() {
         setIsEditing(false);
         setEditTitle(link.title);
         setEditUrl(link.url);
         setEditImage(link.image ?? "");
     }
-
     function toggleVisible(checked: boolean) {
         onUpdateLink(link.id, { visible: checked });
     }
-
     function handleDeleteClick() {
         setShowDeleteModal(true);
     }
-
     function confirmDelete() {
         setShowDeleteModal(false);
         onDeleteLink(link.id);
     }
-
     function cancelDelete() {
         setShowDeleteModal(false);
     }
 
     return (
-        <li
-            ref={setNodeRef}
-            style={style}
-            className="border p-3 rounded border-gray-500 bg-white/5"
-        >
+        <li ref={setNodeRef} style={style} className="border p-3 rounded border-gray-500">
             {isEditing ? (
+                // Modo edición
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
                         <label className="text-sm">Título:</label>
@@ -145,6 +137,7 @@ export default function MultiSectionsItem({
                     </div>
                 </div>
             ) : (
+                // Modo lectura
                 <div className="flex items-center gap-4">
                     {/* Drag handle */}
                     <div
@@ -155,6 +148,7 @@ export default function MultiSectionsItem({
                     >
                         ☰
                     </div>
+
                     {/* Imagen */}
                     {link.image && (
                         <img
@@ -168,9 +162,9 @@ export default function MultiSectionsItem({
                         <div className="font-semibold">{link.title}</div>
                         <div className="text-xs text-gray-400">{link.url}</div>
                     </div>
-                    {/* Espaciador */}
                     <div className="flex-1" />
-                    {/* Visible toggle + editar + borrar */}
+
+                    {/* Botones */}
                     <div className="flex items-center gap-2">
                         <Switch
                             className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-red-500"
@@ -187,6 +181,7 @@ export default function MultiSectionsItem({
                 </div>
             )}
 
+            {/* Modal borrar */}
             {showDeleteModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
                     <div className="bg-black w-full max-w-sm mx-auto p-4 rounded shadow-lg">

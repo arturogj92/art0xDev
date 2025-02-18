@@ -32,9 +32,9 @@ export default function Header({
           text-xl           /* por defecto, pantallas muy pequeñas */
           sm:text-2xl
           md:text-3xl
-          bg-gradient-to-l
-          to-blue-600
-          from-green-300
+          bg-gradient-to-tr
+          from-green-200
+          to-blue-400
           font-bold
           text-transparent
           bg-clip-text

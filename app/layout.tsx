@@ -1,7 +1,15 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { ThemeProvider } from "@/components/theme-provider"; // Asegúrate de importar correctamente
+import type {Metadata} from "next";
+import {DM_Sans, Geist, Geist_Mono} from "next/font/google";
+import {ThemeProvider} from "@/components/theme-provider"; // Asegúrate de importar correctamente
 import "./globals.css";
+
+// Carga la fuente, opcionalmente indicando subsets, weights, styles
+const dmSans = DM_Sans({
+    subsets: ['latin'],   // o ['latin', 'latin-ext'] etc.
+    weight: ['400', '500', '700'], // pesos que uses
+    variable: '--font-dm-sans',  // para usarla como variable CSS
+    display: 'swap',      // recomendación de Google
+});
 
 const geistSans = Geist({
     variable: "--font-geist-sans",

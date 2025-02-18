@@ -19,3 +19,7 @@ body {
   transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
 }
 
+/*!* Por ejemplo, en tu globals.css o en un archivo CSS *!*/
+/*:root {*/
+/*  font-family: var(--font-dm-sans), sans-serif;*/
+/*}*/

@@ -24,7 +24,7 @@ export default async function Home() {
     const links = (linksData as LinkData[]) || [];
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-black to-fuchsia-950 p-4">
+        <div className="bg-gradient-to-b">
             <LandingPreview sections={sections} links={links}/>
         </div>
     );
