@@ -118,7 +118,11 @@ export default function MultiSectionsItem({
     }
 
     return (
-        <li ref={setNodeRef} style={style} className="border p-3 rounded border-gray-500">
+        <li
+            ref={setNodeRef}
+            style={style}
+            className="border p-3 rounded border-gray-500 bg-white/5"
+        >
             {isEditing ? (
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
@@ -142,6 +146,7 @@ export default function MultiSectionsItem({
                 </div>
             ) : (
                 <div className="flex items-center gap-4">
+                    {/* Drag handle */}
                     <div
                         className="cursor-grab px-2 select-none text-sm bg-gray-700 text-white rounded w-fit"
                         ref={setActivatorNodeRef}
@@ -150,6 +155,7 @@ export default function MultiSectionsItem({
                     >
                         ☰
                     </div>
+                    {/* Imagen */}
                     {link.image && (
                         <img
                             src={link.image}
@@ -157,11 +163,14 @@ export default function MultiSectionsItem({
                             className="w-10 h-10 object-cover rounded"
                         />
                     )}
+                    {/* Info */}
                     <div>
                         <div className="font-semibold">{link.title}</div>
                         <div className="text-xs text-gray-400">{link.url}</div>
                     </div>
+                    {/* Espaciador */}
                     <div className="flex-1" />
+                    {/* Visible toggle + editar + borrar */}
                     <div className="flex items-center gap-2">
                         <Switch
                             className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-red-500"

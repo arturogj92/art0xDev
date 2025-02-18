@@ -1,4 +1,4 @@
-import type { Config } from "tailwindcss";
+import type {Config} from "tailwindcss";
 
 export default {
   darkMode: "class", // Activamos el dark mode por clase
@@ -15,5 +15,7 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require("@tailwindcss/container-queries"), // <= plugin oficial (opcional en 3.3+)
+  ],
 } satisfies Config;

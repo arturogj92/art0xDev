@@ -11,24 +11,45 @@ interface HeaderProps {
     profileImage: string;
 }
 
-export default function Header({ name, role, description, profileImage }: HeaderProps) {
+export default function Header({
+                                   name,
+                                   role,
+                                   description,
+                                   profileImage,
+                               }: HeaderProps) {
     return (
-        <CardContent className="mt-20 p-4 flex flex-col items-center text-center">
-            <Avatar className="w-36 h-36">
+        <CardContent className="mt-10 p-4 flex flex-col items-center text-center">
+            {/* Avatar con tamaños distintos en breakpoints */}
+            <Avatar className="w-24 h-24 sm:w-28 sm:h-28 md:w-36 md:h-36">
                 <AvatarImage src={profileImage} alt={name}/>
                 <AvatarFallback>{name.charAt(0)}</AvatarFallback>
             </Avatar>
 
-            <h1 className="mt-4 text-3xl bg-gradient-to-l to-blue-600 from-green-300 font-bold text-transparent bg-clip-text">
+            {/* Nombre y rol más pequeños en pantallas muy pequeñas */}
+            <h1
+                className="
+          mt-4
+          text-xl           /* por defecto, pantallas muy pequeñas */
+          sm:text-2xl
+          md:text-3xl
+          bg-gradient-to-l
+          to-blue-600
+          from-green-300
+          font-bold
+          text-transparent
+          bg-clip-text
+        "
+            >
                 {name} · {role}
             </h1>
 
+            {/* Descripción con tipografías escalonadas */}
             <p
                 className="
     mt-2
     text-xs       /* tamaño de fuente mínimo para pantallas muy pequeñas */
     sm:text-sm    /* en pantallas >= sm sube a text-sm */
-    md:text-base  /* en pantallas >= md sube a text-base */
+    sm:text-base  /* en pantallas >= md sube a text-base */
     text-white
     text-center
     break-words   /* fuerza a romper palabras si no caben */
@@ -38,7 +59,6 @@ export default function Header({ name, role, description, profileImage }: Header
             >
                 <TypewriterText text={description}/>
             </p>
-
         </CardContent>
     );
 }
