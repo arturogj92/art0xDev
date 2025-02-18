@@ -8,29 +8,6 @@ import {Input} from "@/components/ui/input";
 import {Switch} from "@/components/ui/switch";
 import {LinkData} from "./types";
 
-function PencilIcon() {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth="1.5"
-            stroke="currentColor"
-            className="size-6"
-        >
-            <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931ZM19.5 7.125 16.862 4.487"
-            />
-            <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
-            />
-        </svg>
-    );
-}
 function TrashIcon() {
     return (
         <svg
@@ -39,12 +16,19 @@ function TrashIcon() {
             viewBox="0 0 24 24"
             strokeWidth="1.5"
             stroke="currentColor"
-            className="size-6"
+            className="w-5 h-5"
         >
             <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673A2.25 2.25 0 0 1 15.916 21H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397M4.75 5.75h14.5"
+                d="m14.74 9-.346 9m-4.788 0L9.26 9
+           m9.968-3.21c.342.052.682.107 1.022.166
+           m-1.022-.165L18.16 19.673
+           A2.25 2.25 0 0 1 15.916 21H8.084
+           a2.25 2.25 0 0 1-2.244-2.077
+           L4.772 5.79m14.456 0
+           a48.108 48.108 0 0 0-3.478-.397
+           M4.75 5.75h14.5"
             />
         </svg>
     );
@@ -61,6 +45,7 @@ export default function MultiSectionsItem({
                                               onUpdateLink,
                                               onDeleteLink,
                                           }: MultiSectionsItemProps) {
+    // DnDKit: configuración de arrastre
     const {
         setNodeRef,
         setActivatorNodeRef,
@@ -71,36 +56,43 @@ export default function MultiSectionsItem({
         isDragging,
     } = useSortable({id: link.id});
 
+    // Estilos de arrastre
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
-        background: isDragging ? "rgba(255,255,255,0.1)" : "transparent",
+        background: isDragging ? "rgba(255,255,255,0.07)" : "transparent",
     };
 
-    const [isEditing, setIsEditing] = useState(false);
+    // Estado para el modal de confirmación de borrado
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+    // Campos editables (siempre en edición)
     const [editTitle, setEditTitle] = useState(link.title);
     const [editUrl, setEditUrl] = useState(link.url);
     const [editImage, setEditImage] = useState(link.image ?? "");
 
-    function handleSave() {
-        onUpdateLink(link.id, {
-            title: editTitle,
-            url: editUrl,
-            image: editImage,
-        });
-        setIsEditing(false);
+    // Al cambiar cualquier campo => onUpdate
+    function handleChangeTitle(val: string) {
+        setEditTitle(val);
+        onUpdateLink(link.id, {title: val});
     }
-    function handleCancel() {
-        setIsEditing(false);
-        setEditTitle(link.title);
-        setEditUrl(link.url);
-        setEditImage(link.image ?? "");
+
+    function handleChangeUrl(val: string) {
+        setEditUrl(val);
+        onUpdateLink(link.id, {url: val});
     }
+
+    function handleChangeImage(val: string) {
+        setEditImage(val);
+        onUpdateLink(link.id, {image: val});
+    }
+
+    // Visibilidad => toggle
     function toggleVisible(checked: boolean) {
         onUpdateLink(link.id, { visible: checked });
     }
+
+    // Borrar
     function handleDeleteClick() {
         setShowDeleteModal(true);
     }
@@ -113,75 +105,100 @@ export default function MultiSectionsItem({
     }
 
     return (
-        <li ref={setNodeRef} style={style} className="border p-3 rounded border-gray-500">
-            {isEditing ? (
-                // Modo edición
-                <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-2">
-                        <label className="text-sm">Título:</label>
-                        <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)}/>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <label className="text-sm">URL:</label>
-                        <Input value={editUrl} onChange={(e) => setEditUrl(e.target.value)}/>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <label className="text-sm">Imagen:</label>
-                        <Input value={editImage} onChange={(e) => setEditImage(e.target.value)}/>
-                    </div>
-                    <div className="flex gap-2 justify-end">
-                        <Button variant="secondary" onClick={handleCancel}>
-                            Cancelar
-                        </Button>
-                        <Button onClick={handleSave}>Guardar</Button>
-                    </div>
+        <li
+            ref={setNodeRef}
+            style={style}
+            className="
+        border border-gray-500
+        p-3
+        rounded-2xl
+        bg-black/40
+        text-white
+        flex flex-col gap-3
+      "
+        >
+            {/* Sección superior: Drag handle + (opcional) preview imagen */}
+            <div className="flex items-center gap-3">
+                {/* Drag handle */}
+                <div
+                    className="
+            cursor-grab
+            px-2
+            select-none
+            text-sm
+            bg-gray-700
+            text-white
+            rounded
+          "
+                    ref={setActivatorNodeRef}
+                    {...attributes}
+                    {...listeners}
+                >
+                    ☰
                 </div>
-            ) : (
-                // Modo lectura
-                <div className="flex items-center gap-4">
-                    {/* Drag handle */}
-                    <div
-                        className="cursor-grab px-2 select-none text-sm bg-gray-700 text-white rounded w-fit"
-                        ref={setActivatorNodeRef}
-                        {...attributes}
-                        {...listeners}
-                    >
-                        ☰
-                    </div>
 
-                    {/* Imagen */}
-                    {link.image && (
-                        <img
-                            src={link.image}
-                            alt={link.title}
-                            className="w-10 h-10 object-cover rounded"
-                        />
-                    )}
-                    {/* Info */}
-                    <div>
-                        <div className="font-semibold">{link.title}</div>
-                        <div className="text-xs text-gray-400">{link.url}</div>
-                    </div>
-                    <div className="flex-1" />
+                {/* (Opcional) Preview imagen si existe */}
+                {link.image && (
+                    <img
+                        src={link.image}
+                        alt={link.title}
+                        className="w-10 h-10 object-cover rounded"
+                    />
+                )}
+            </div>
 
-                    {/* Botones */}
-                    <div className="flex items-center gap-2">
-                        <Switch
-                            className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-red-500"
-                            checked={link.visible}
-                            onCheckedChange={toggleVisible}
-                        />
-                        <Button onClick={() => setIsEditing(true)}>
-                            <PencilIcon/>
-                        </Button>
-                        <Button variant="destructive" onClick={handleDeleteClick}>
-                            <TrashIcon/>
-                        </Button>
-                    </div>
+            {/* Campo Título */}
+            <div>
+                <label className="text-sm font-medium">Título</label>
+                <Input
+                    value={editTitle}
+                    onChange={(e) => handleChangeTitle(e.target.value)}
+                    className="mt-1"
+                />
+            </div>
+
+            {/* Campo URL */}
+            <div>
+                <label className="text-sm font-medium">URL</label>
+                <Input
+                    value={editUrl}
+                    onChange={(e) => handleChangeUrl(e.target.value)}
+                    className="mt-1"
+                />
+            </div>
+
+            {/* Campo Imagen */}
+            <div>
+                <label className="text-sm font-medium">Imagen</label>
+                <Input
+                    value={editImage}
+                    onChange={(e) => handleChangeImage(e.target.value)}
+                    className="mt-1"
+                />
+            </div>
+
+            {/* Pie: Toggle Visible a la IZQUIERDA + Botón Borrar a la derecha */}
+            <div className="flex items-center justify-between mt-2">
+                {/* Toggle en la izquierda */}
+                <div className="flex items-center gap-2">
+                    <Switch
+                        className="
+              data-[state=checked]:bg-green-500
+              data-[state=unchecked]:bg-red-500
+            "
+                        checked={link.visible}
+                        onCheckedChange={toggleVisible}
+                    />
+                    <span className="text-sm">Visible</span>
                 </div>
-            )}
 
-            {/* Modal borrar */}
+                {/* Botón borrar */}
+                <Button variant="destructive" onClick={handleDeleteClick}>
+                    <TrashIcon/>
+                </Button>
+            </div>
+
+            {/* Modal confirmación de borrado */}
             {showDeleteModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
                     <div className="bg-black w-full max-w-sm mx-auto p-4 rounded shadow-lg">
