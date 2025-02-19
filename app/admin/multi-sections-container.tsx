@@ -31,7 +31,8 @@ function ArrowUpIcon() {
         >
             <path
                 fillRule="evenodd"
-                d="M9.47 6.47a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 1 1-1.06 1.06L10 8.06l-3.72 3.72a.75.75 0 1 1-1.06-1.06l4.25-4.25Z"
+                d="M9.47 6.47a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 1 1-1.06 1.06L10
+           8.06l-3.72 3.72a.75.75 0 1 1-1.06-1.06l4.25-4.25Z"
                 clipRule="evenodd"
             />
         </svg>
@@ -48,7 +49,9 @@ function ArrowDownIcon() {
         >
             <path
                 fillRule="evenodd"
-                d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 13.06l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+                d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 13.06l3.72-3.72a.75.75 0 1 1
+           1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1
+           0-1.06Z"
                 clipRule="evenodd"
             />
         </svg>
@@ -68,12 +71,19 @@ function PencilIcon() {
             <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931ZM19.5 7.125 16.862 4.487"
+                d="m16.862 4.487 1.687-1.688a1.875 1.875
+           0 1 1 2.652 2.652L10.582 16.07a4.5 4.5
+           0 0 1-1.897 1.13L6 18l.8-2.685a4.5
+           4.5 0 0 1 1.13-1.897l8.932-8.931ZM19.5
+           7.125 16.862 4.487"
             />
             <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
+                d="M18 14v4.75A2.25 2.25 0 0 1
+           15.75 21H5.25A2.25 2.25 0 0 1
+           3 18.75V8.25A2.25 2.25 0 0 1
+           5.25 6H10"
             />
         </svg>
     );
@@ -92,23 +102,19 @@ function TrashIcon() {
             <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673A2.25 2.25 0 0 1 15.916 21H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397M4.75 5.75h14.5"
+                d="m14.74 9-.346 9m-4.788
+           0L9.26 9m9.968-3.21c.342.052.682.107
+           1.022.166m-1.022-.165L18.16
+           19.673A2.25 2.25 0 0 1
+           15.916 21H8.084a2.25 2.25 0 0 1
+           -2.244-2.077L4.772 5.79m14.456
+           0a48.108 48.108 0 0 0-3.478-.397M4.75
+           5.75h14.5"
             />
         </svg>
     );
 }
 
-function SectionIcon() {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="size-5">
-            <path
-                d="M2 4.25A2.25 2.25 0 0 1 4.25 2h6.5A2.25 2.25 0 0 1 13 4.25V5.5H9.25A3.75 3.75 0 0 0 5.5 9.25V13H4.25A2.25 2.25 0 0 1 2 10.75v-6.5Z"/>
-            <path
-                d="M9.25 7A2.25 2.25 0 0 0 7 9.25v6.5A2.25 2.25 0 0 0 9.25 18h6.5A2.25 2.25 0 0 0 18 15.75v-6.5A2.25 2.25 0 0 0 15.75 7h-6.5Z"/>
-        </svg>
-
-    );
-}
 
 interface MultiSectionsContainerProps {
     containerId: string;
@@ -141,8 +147,6 @@ export default function MultiSectionsContainer({
                                                    onCreateLinkInSection,
                                                    onUpdateSection,
                                                    onDeleteSection,
-                                                   onLinksReordered,
-
                                                }: MultiSectionsContainerProps) {
     const { setNodeRef } = useDroppable({ id: containerId });
     const sec = sections.find((s) => s.id === containerId);
@@ -152,7 +156,6 @@ export default function MultiSectionsContainer({
     const hideDown = idx === total - 1;
     const linkObjects = items.map((id) => links.find((l) => l.id === id)).filter(Boolean);
 
-    // Edición de sección
     const [isEditingSection, setIsEditingSection] = useState(false);
     const [editTitle, setEditTitle] = useState(sec?.title || "");
     const [showDeleteModalSection, setShowDeleteModalSection] = useState(false);
@@ -191,8 +194,10 @@ export default function MultiSectionsContainer({
     }
 
     return (
-        <div ref={setNodeRef}
-             className="border-dashed border border-purple-900 p-4 rounded bg-black hover:bg-purple-950/10">
+        <div
+            ref={setNodeRef}
+            className="border-dashed border border-purple-900 p-4 rounded bg-black hover:bg-purple-950/10"
+        >
             <div className="flex items-center justify-between mb-2">
                 {isEditingSection && sec ? (
                     <div className="flex items-center gap-2">

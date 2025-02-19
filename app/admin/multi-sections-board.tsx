@@ -26,6 +26,7 @@ interface MultiSectionsBoardProps {
     onDeleteLink: (id: string) => void;
     onUpdateSection: (id: string, updates: Partial<SectionData>) => void;
     onDeleteSection: (id: string) => void;
+    /** Called whenever a link or section is reordered, so you can refresh the iframe. */
     onLinksReordered?: () => void;
 }
 
@@ -45,7 +46,7 @@ export default function MultiSectionsBoard({
     const [showOverlay, setShowOverlay] = useState(false);
 
     useEffect(() => {
-        // "no-section"
+        // no-section
         const noSectionItems = links
             .filter((l) => l.section_id === null)
             .sort((a, b) => a.position - b.position)
@@ -86,7 +87,7 @@ export default function MultiSectionsBoard({
             const data = await res.json();
             if (res.ok) {
                 setLinks((prev) => [...prev, data]);
-                onLinksReordered?.();
+                onLinksReordered?.(); // Refresh
             } else {
                 console.error("Error creando link:", data.error);
             }
@@ -146,12 +147,12 @@ export default function MultiSectionsBoard({
         }
 
         if (activeContainer.id === overContainer.id) {
-            // reordenar en la misma
+            // reorder in same container
             const reordered = arrayMove(fromItems, oldIndex, newIndex);
             newContainers[fromIndex].items = reordered;
             reorderLinksInContainer(reordered);
         } else {
-            // mover a otra
+            // move to another container
             fromItems.splice(oldIndex, 1);
             toItems.splice(newIndex, 0, active.id as string);
             updateLinkContainer(active.id as string, overContainer.id);
@@ -159,7 +160,7 @@ export default function MultiSectionsBoard({
             reorderLinksInContainer(fromItems);
         }
         setContainers(newContainers);
-        onLinksReordered?.();
+        onLinksReordered?.(); // Refresh
     }
 
     async function updateLinkContainer(linkId: string, containerId: string) {
@@ -209,7 +210,7 @@ export default function MultiSectionsBoard({
                 sec.position = i;
             });
             patchSections(newArr);
-            onLinksReordered?.();
+            onLinksReordered?.(); // Refresh
             return newArr;
         });
     }
@@ -224,7 +225,7 @@ export default function MultiSectionsBoard({
                 sec.position = i;
             });
             patchSections(newArr);
-            onLinksReordered?.();
+            onLinksReordered?.(); // Refresh
             return newArr;
         });
     }
@@ -289,6 +290,7 @@ export default function MultiSectionsBoard({
                                     const data = await res.json();
                                     if (res.ok) {
                                         setSections((prev) => [...prev, data]);
+                                        onLinksReordered?.(); // Refresh
                                     } else {
                                         console.error("Error creando sección:", data.error);
                                     }

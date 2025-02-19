@@ -14,7 +14,12 @@ import {arrayMove, SortableContext, verticalListSortingStrategy,} from "@dnd-kit
 import {SocialLinkData} from "./types";
 import {SortableSocialItem} from "./sortable-social-item";
 
-export default function SocialLinksPanel() {
+interface SocialLinksPanelProps {
+    /** Called when a social link is reordered (optional) */
+    onReorder?: () => void;
+}
+
+export default function SocialLinksPanel({onReorder}: SocialLinksPanelProps) {
     const [socialLinks, setSocialLinks] = useState<SocialLinkData[]>([]);
 
     useEffect(() => {
@@ -65,14 +70,23 @@ export default function SocialLinksPanel() {
         fetch("/api/social-links", {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(updated.map((item) => ({id: item.id, position: item.position}))),
+            body: JSON.stringify(
+                updated.map((item) => ({id: item.id, position: item.position}))
+            ),
         });
+
+        // Call the callback to refresh the iframe if needed
+        onReorder?.();
     }
 
     return (
         <div className="border p-4 my-8 border-purple-900">
             <h2 className="text-lg font-semibold">Social Links</h2>
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+            >
                 <SortableContext
                     items={socialLinks.map((s) => s.id)}
                     strategy={verticalListSortingStrategy}
@@ -81,7 +95,11 @@ export default function SocialLinksPanel() {
                         {socialLinks
                             .sort((a, b) => a.position - b.position)
                             .map((soc) => (
-                                <SortableSocialItem key={soc.id} social={soc} onUpdate={handleUpdate}/>
+                                <SortableSocialItem
+                                    key={soc.id}
+                                    social={soc}
+                                    onUpdate={handleUpdate}
+                                />
                             ))}
                     </ul>
                 </SortableContext>

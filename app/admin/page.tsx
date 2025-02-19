@@ -7,14 +7,28 @@ import MultiSectionsBoard from "./multi-sections-board";
 import SocialLinksPanel from "./social-links-panel";
 
 const LandingIcon = () => {
-    return <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="size-10">
-        <path fill-rule="evenodd"
-              d="M16.403 12.652a3 3 0 0 0 0-5.304 3 3 0 0 0-3.75-3.751 3 3 0 0 0-5.305 0 3 3 0 0 0-3.751 3.75 3 3 0 0 0 0 5.305 3 3 0 0 0 3.75 3.751 3 3 0 0 0 5.305 0 3 3 0 0 0 3.751-3.75Zm-2.546-4.46a.75.75 0 0 0-1.214-.883l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
-              clip-rule="evenodd"/>
-    </svg>
-
-
-}
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            className="size-10"
+        >
+            <path
+                fillRule="evenodd"
+                d="M16.403 12.652a3 3 0 0 0 0-5.304 3 3 0 0 0-3.75-3.751
+           3 3 0 0 0-5.305 0 3 3 0 0 0-3.751
+           3.75 3 3 0 0 0 0 5.305 3 3 0 0 0
+           3.75 3.751 3 3 0 0 0 5.305 0
+           3 3 0 0 0 3.751-3.75Zm-2.546-4.46a.75.75
+           0 0 0-1.214-.883l-3.483 4.79-1.88-1.88a.75.75
+           0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0
+           1.137-.089l4-5.5Z"
+                clipRule="evenodd"
+            />
+        </svg>
+    );
+};
 
 export default function AdminPage() {
     const [links, setLinks] = useState<LinkData[]>([]);
@@ -113,9 +127,7 @@ export default function AdminPage() {
                 }
             }
             setLinks((prev) =>
-                prev.map((link) =>
-                    link.section_id === id ? {...link, section_id: null} : link
-                )
+                prev.map((link) => (link.section_id === id ? {...link, section_id: null} : link))
             );
             const res = await fetch(`/api/sections?id=${id}`, {method: "DELETE"});
             const data = await res.json();
@@ -134,12 +146,11 @@ export default function AdminPage() {
         <div className="flex flex-col md:flex-row min-h-screen">
             {/* Panel izquierdo */}
             <div className="md:w-[56.666%] p-4 border-b md:border-b-0 md:border-r border-gray-600">
-                <div className={"flex items-center"}>
-                    <span className={'top[10]'}>
-                <LandingIcon/>
-                        </span>
-                    <h1 className="text-2xl font-bold mb-4 pt-3 pl-2">Art0xDev Landing </h1>
+                <div className="flex items-center">
+                    <LandingIcon/>
+                    <h1 className="text-2xl font-bold mb-4 pt-3 pl-2">Art0xDev Landing</h1>
                 </div>
+
                 <MultiSectionsBoard
                     links={links}
                     setLinks={setLinks}
@@ -149,71 +160,59 @@ export default function AdminPage() {
                     onDeleteLink={handleDeleteLink}
                     onUpdateSection={handleUpdateSection}
                     onDeleteSection={handleDeleteSection}
-                    // onLinksReordered={() => setRefreshCount((c) => c + 1)} // Si quieres refrescar la preview al mover
+                    onLinksReordered={() => setRefreshCount((c) => c + 1)}
                 />
 
-                <SocialLinksPanel/>
+                <SocialLinksPanel onReorder={() => setRefreshCount((c) => c + 1)}/>
             </div>
 
-            {/* Panel derecho */}
-            <div className="
-        flex-[13]
-        bg-black
-        md:sticky
-        md:top-0
-        h-screen
-        flex flex-col
-        items-center
-        justify-center
-      "
+            {/* Panel derecho => la preview */}
+            <div
+                className="
+          flex-[13]
+          bg-black
+          md:sticky
+          md:top-0
+          h-screen
+          flex flex-col
+          items-center
+          justify-center
+        "
             >
                 <div className="text-white p-2 rounded mb-4 w-full text-center">
                     <p className="font-bold">PREVIEW</p>
                 </div>
 
-                {/*
-          Contenedor para mostrar la imagen 590x1196 a la mitad => 295x598
-          con scale=1 (si quieres tal cual), o “real” => 590x1196 con scale=0.5
-          Lo importante es que "coincidan" contenedor e imagen.
-        */}
                 <div
                     className="
             relative
-            w-[300px]  /* mitad de 590 */
-            h-[598px]  /* mitad de 1196 */
-            /* si quieres ajustarlo más grande/pequeño, puedes scale o cambiar w/h */
-            scale-[1] /* mitad de 1 */
+            w-[300px]
+            h-[598px]
+            scale-[1]
           "
                 >
-                    {/* Imagen iPhone => 590x1196 (metida a la mitad) */}
+                    {/* iPhone image => 590x1196 scaled to half */}
                     <img
                         src="/images/iphone16-frame.png"
                         alt="iPhone frame"
                         className="absolute w-full h-full z-20 pointer-events-none"
                     />
-
-                    {/*
-            "Pantalla" interna.
-            Ajusta top, left, width, height a la mitad también.
-            Ej: supongamos la pantalla real está a top=100, left=20 y mide 550x1000
-            => la mitad es top=50, left=10, w=275, h=500
-            Esto es un ejemplo, tendrás que ir probando.
-          */}
                     <div
                         className="
               absolute
-              top-[5px]   /* EJEMPLO, la mitad de 120 */
-              left-[0px]  /* EJEMPLO, la mitad de 30 */
-              w-[300px]    /* EJEMPLO, la mitad de 530 */
-              h-[598px]    /* EJEMPLO, la mitad de 1000 */
+              top-[5px]
+              left-[0px]
+              w-[300px]
+              h-[598px]
               z-10
               pt-4
               pb-4
               overflow-y-auto
               bg-black
-              rounded-[80px] /* para redondear esquinas */
+              rounded-[80px]
             "
                     >
+                        {/* Refresh with ?r=refreshCount */}
                         <iframe
                             key={refreshCount}
                             src={`/?r=${refreshCount}`}

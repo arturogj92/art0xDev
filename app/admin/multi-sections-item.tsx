@@ -5,8 +5,8 @@ import {useSortable} from "@dnd-kit/sortable";
 import React, {useRef, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
-import {LinkData} from "./types";
 import {Toggle} from "@/components/ui/toggle";
+import {LinkData} from "./types";
 
 /** Iconos */
 function EyeIcon() {
@@ -128,6 +128,18 @@ function CloseIcon() {
     );
 }
 
+// Helper to parse the fileName from your public URL
+function getFileNameFromUrl(url: string): string | null {
+    // Example: https://xyz.supabase.co/storage/v1/object/public/images/image-123.png
+    // We want "image-123.png"
+    try {
+        const parts = url.split("/");
+        return parts[parts.length - 1]; // e.g. "image-123.png"
+    } catch {
+        return null;
+    }
+}
+
 interface MultiSectionsItemProps {
     link: LinkData;
     onUpdateLink: (id: string, updates: Partial<LinkData>) => void;
@@ -152,12 +164,12 @@ export default function MultiSectionsItem({
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
-        background: isDragging ? "rgba(255,255,255,0.1)" : "transparent",
+        background: isDragging ? "rgba(128,90,213,0.3)" : "transparent", // purple overlay
     };
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-    // Estado "edición permanente"
+    // Edición permanente
     const [title, setTitle] = useState(link.title);
     const [url, setUrl] = useState(link.url);
     const [image, setImage] = useState(link.image ?? "");
@@ -175,11 +187,11 @@ export default function MultiSectionsItem({
     }
 
     // Toggle visible
-    function toggleVisible(checked: boolean) {
-        onUpdateLink(link.id, {visible: checked});
+    function toggleVisible(pressed: boolean) {
+        onUpdateLink(link.id, {visible: pressed});
     }
 
-    // Subir imagen => /api/images
+    // Subir imagen => /api/images (POST)
     async function handleSelectFile(e: React.ChangeEvent<HTMLInputElement>) {
         if (!e.target.files || e.target.files.length === 0) return;
         const file = e.target.files[0];
@@ -200,6 +212,7 @@ export default function MultiSectionsItem({
                     console.error("Error al subir imagen:", data.error);
                     return;
                 }
+                // data.url => the public URL
                 setImage(data.url);
                 onUpdateLink(link.id, {image: data.url});
             } catch (error) {
@@ -212,7 +225,26 @@ export default function MultiSectionsItem({
     function handleUploadClick() {
         fileInputRef.current?.click();
     }
-    function handleRemoveImage() {
+
+    // Quitar imagen => call DELETE /api/images?fileName=xxx
+    async function handleRemoveImage() {
+        if (image) {
+            const fileName = getFileNameFromUrl(image);
+            if (fileName) {
+                try {
+                    const res = await fetch(`/api/images?fileName=${fileName}`, {
+                        method: "DELETE",
+                    });
+                    const data = await res.json();
+                    if (!res.ok) {
+                        console.error("Error al borrar imagen del servidor:", data.error);
+                    }
+                } catch (error) {
+                    console.error("Error al borrar imagen:", error);
+                }
+            }
+        }
+        // Actualizamos local + link
         setImage("");
         onUpdateLink(link.id, {image: ""});
     }
@@ -242,59 +274,58 @@ export default function MultiSectionsItem({
         min-h-[5rem]
       "
         >
-            {/* HANDLE => arriba a la izquierda */}
+            {/* Drag handle => top-left */}
             <div
                 ref={setActivatorNodeRef}
                 {...attributes}
                 {...listeners}
-                className="
+                className={`
           absolute
           top-2
           left-2
           cursor-grab
           px-2
           text-sm
-          {/*bg-purple-900*/}
           text-white
           rounded
-        "
+          ${isDragging ? "bg-purple-500" : "bg-gray-700"}
+        `}
             >
                 ☰
             </div>
 
-            {/* ZONA SUPERIOR DERECHA => Toggle + Ojo y Papelera */}
+            {/* top-right => toggle + trash */}
             <div className="absolute top-2 right-2 flex items-center gap-2">
-                {/* Toggle + icono ojo */}
-                {/* Botón Borrar */}
-                <Button variant="destructive" className="text-xs px-2 py-1 hover:bg-purple-900"
-                        onClick={handleDeleteClick}>
+                {/* Botón borrar */}
+                <Button
+                    variant="destructive"
+                    className="text-xs px-2 py-1 hover:bg-purple-900"
+                    onClick={handleDeleteClick}
+                >
                     <TrashIcon/>
                 </Button>
 
-                <div className="flex items-center gap-1">
-                    <Toggle
-                        className="
-            {/*bg-gray-700*/}
-            hover:bg-purple-900
-            {/*data-[state=on]:bg-purple-700*/}
-            {/*data-[state=off]:bg-red-600*/}
+                {/* Eye toggle => uses the pressed state for visible */}
+                <Toggle
+                    className="
             rounded-full
             w-12 h-6
             flex items-center justify-center
+            bg-gray-700
+            hover:bg-purple-900
           "
-                        pressed={link.visible}
-                        onPressedChange={toggleVisible}
-                    >
-                        {link.visible ? <EyeIcon/> : <EyeSlashIcon/>}
-                    </Toggle>
-                </div>
+                    pressed={link.visible}
+                    onPressedChange={toggleVisible}
+                >
+                    {link.visible ? <EyeIcon/> : <EyeSlashIcon/>}
+                </Toggle>
             </div>
 
-            {/* CONTENIDO principal => flex row: text fields en el centro, imagen a la derecha */}
+            {/* Content => fields + image */}
             <div className="mt-8 flex items-start justify-between gap-4">
-                {/* 1) Campos Título y URL */}
+                {/* Título + URL */}
                 <div className="flex flex-col gap-2 flex-1">
-                    {/* Título con icono a la IZQUIERDA => icon + input */}
+                    {/* Título => icon left */}
                     <div className="relative">
             <span className="absolute inset-y-0 left-2 flex items-center pointer-events-none">
               <TitleIcon/>
@@ -306,7 +337,7 @@ export default function MultiSectionsItem({
                             className="
                 w-full text-sm
                 pl-8 pr-2 py-1
-                rounded-[100]
+                rounded-[100px]
                 hover:bg-purple-950/40
                 focus:bg-purple-950/40
                 bg-black/50
@@ -316,7 +347,7 @@ export default function MultiSectionsItem({
                         />
                     </div>
 
-                    {/* URL con icono a la IZQUIERDA => icon + input */}
+                    {/* URL => icon left */}
                     <div className="relative">
             <span className="absolute inset-y-0 left-2 flex items-center pointer-events-none">
               <LinkIcon/>
@@ -328,7 +359,7 @@ export default function MultiSectionsItem({
                             className="
                 w-full text-sm
                 pl-8 pr-2 py-1
-                rounded-[100]
+                rounded-[100px]
                 hover:bg-purple-950/40
                 focus:bg-purple-950/40
                 bg-black/50
@@ -339,7 +370,7 @@ export default function MultiSectionsItem({
                     </div>
                 </div>
 
-                {/* 2) Imagen (derecha) */}
+                {/* Imagen => right */}
                 <div className="relative w-20 h-20 flex-shrink-0">
                     {image ? (
                         <>
@@ -348,7 +379,7 @@ export default function MultiSectionsItem({
                                 alt={title}
                                 className="w-full h-full object-cover rounded-xl"
                             />
-                            {/* Botón X superpuesto */}
+                            {/* X => remove image */}
                             <button
                                 type="button"
                                 onClick={handleRemoveImage}
@@ -408,7 +439,7 @@ export default function MultiSectionsItem({
                 </div>
             </div>
 
-            {/* MODAL de confirmación de borrado */}
+            {/* Modal confirm delete link */}
             {showDeleteModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
                     <div className="bg-black w-full max-w-sm mx-auto p-4 rounded shadow-lg">

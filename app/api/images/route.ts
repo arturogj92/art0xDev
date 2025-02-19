@@ -1,10 +1,11 @@
 // app/api/images/route.ts
 import {NextRequest, NextResponse} from "next/server";
-import {supabaseAdmin} from "@/lib/supabase"; // Ajusta la ruta
+import {supabaseAdmin} from "@/lib/supabase"; // Ajusta la ruta si difiere
 
+// POST => subir imagen
 export async function POST(req: NextRequest) {
     try {
-        const {base64} = await req.json();  // la parte pura
+        const {base64} = await req.json();
         if (!base64) {
             throw new Error("No se recibió base64");
         }
@@ -12,20 +13,20 @@ export async function POST(req: NextRequest) {
         // Convertir a buffer
         const buffer = Buffer.from(base64, "base64");
 
-        // Generar un nombre de archivo único (p.ej. con un timestamp)
-        const fileName = `image-${Date.now()}.png`;  // o .jpg, etc.
+        // Nombre único
+        const fileName = `image-${Date.now()}.png`; // Ajusta la extensión si usas JPG, etc.
 
-        // Subir a Supabase Storage => bucket "images" (ajusta a tu gusto)
+        // Subir al bucket "images"
         const {data, error} = await supabaseAdmin.storage
-            .from("images")              // nombre del bucket
+            .from("images")
             .upload(fileName, buffer, {
-                contentType: "image/png",  // ajusta a la extensión real
+                contentType: "image/png", // Ajusta a la extensión real
             });
         if (error) {
             throw new Error(error.message);
         }
 
-        // Generar URL pública => getPublicUrl
+        // Obtener URL pública
         const {data: publicData} = supabaseAdmin.storage
             .from("images")
             .getPublicUrl(fileName);
@@ -35,8 +36,33 @@ export async function POST(req: NextRequest) {
             throw new Error("No se pudo obtener la URL pública");
         }
 
-        // Retornar la URL al cliente
-        return NextResponse.json({url: publicUrl});
+        // Devolvemos también el fileName por si quieres guardarlo
+        return NextResponse.json({url: publicUrl, fileName}, {status: 201});
+    } catch (error: any) {
+        return NextResponse.json({error: error.message}, {status: 500});
+    }
+}
+
+// DELETE => borrar imagen del bucket
+export async function DELETE(req: NextRequest) {
+    try {
+        // Leer ?fileName=...
+        const {searchParams} = new URL(req.url);
+        const fileName = searchParams.get("fileName");
+        if (!fileName) {
+            throw new Error("No se proporcionó fileName");
+        }
+
+
+        // Eliminar del bucket "images"
+        const {error} = await supabaseAdmin.storage
+            .from("images")
+            .remove([fileName]);
+        if (error) {
+            throw new Error(error.message);
+        }
+
+        return NextResponse.json({success: true}, {status: 200});
     } catch (error: any) {
         return NextResponse.json({error: error.message}, {status: 500});
     }
