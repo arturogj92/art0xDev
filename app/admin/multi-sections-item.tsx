@@ -176,7 +176,6 @@ export default function MultiSectionsItem({
         onUpdateLink(link.id, {visible: checked});
     }
 
-    // Subir imagen => /api/images
     async function handleSelectFile(e: React.ChangeEvent<HTMLInputElement>) {
         if (!e.target.files || e.target.files.length === 0) return;
         const file = e.target.files[0];
