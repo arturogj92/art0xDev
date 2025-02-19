@@ -5,17 +5,17 @@ import {useSortable} from "@dnd-kit/sortable";
 import React, {useRef, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
-import {Switch} from "@/components/ui/switch";
 import {LinkData} from "./types";
+import {Toggle} from "@/components/ui/toggle";
 
-/** Iconos pequeños */
+/** Iconos */
 function EyeIcon() {
     return (
         <svg
-            className="w-4 h-4 text-gray-300"
+            className="w-3 h-3 text-white"
             fill="none"
             stroke="currentColor"
-            strokeWidth={1.5}
+            strokeWidth={2}
             viewBox="0 0 24 24"
         >
             <path
@@ -35,19 +35,19 @@ function EyeIcon() {
 function EyeSlashIcon() {
     return (
         <svg
-            className="w-4 h-4 text-gray-300"
+            className="w-3 h-3 text-white"
             fill="none"
             stroke="currentColor"
-            strokeWidth={1.5}
+            strokeWidth={2}
             viewBox="0 0 24 24"
         >
             <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 d="M3.98 8.223C5.75 5.546 8.473 3.75 12 3.75c1.467 0 2.84.254 4.084.718M20.02
-        8.223c.745 1.156 1.375 2.136 1.845 3.152a.75.75 0 0 1 0 .75 12.082 12.082 0 0 1-1.845
-        3.152c-1.77 2.677-4.493 4.473-8.02 4.473-1.45 0-2.82-.25-4.06-.708M9.53 9.53l4.94
-        4.94M9.53 14.47l4.94-4.94"
+         8.223c.745 1.156 1.375 2.136 1.845 3.152a.75.75 0 0 1 0 .75 12.082 12.082 0 0 1-1.845
+         3.152c-1.77 2.677-4.493 4.473-8.02 4.473-1.45 0-2.82-.25-4.06-.708M9.53 9.53l4.94
+         4.94M9.53 14.47l4.94-4.94"
             />
         </svg>
     );
@@ -80,10 +80,10 @@ function LinkIcon() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 d="M13.5 6.75h3.75a2.25 2.25 0 0 1
-          2.25 2.25v6a2.25 2.25 0 0 1-2.25
-          2.25H13.5m-3 0H6.75a2.25 2.25 0 0
-          1-2.25-2.25v-6a2.25 2.25 0 0
-          1 2.25-2.25H10.5"
+           2.25 2.25v6a2.25 2.25 0 0 1-2.25
+           2.25H13.5m-3 0H6.75a2.25 2.25 0 0
+           1-2.25-2.25v-6a2.25 2.25 0 0
+           1 2.25-2.25H10.5"
             />
         </svg>
     );
@@ -173,6 +173,8 @@ export default function MultiSectionsItem({
         setUrl(val);
         onUpdateLink(link.id, {url: val});
     }
+
+    // Toggle visible
     function toggleVisible(checked: boolean) {
         onUpdateLink(link.id, {visible: checked});
     }
@@ -235,7 +237,7 @@ export default function MultiSectionsItem({
         border border-gray-500
         p-4
         rounded-2xl
-        bg-black/40
+        bg-black
         text-white
         min-h-[5rem]
       "
@@ -252,7 +254,7 @@ export default function MultiSectionsItem({
           cursor-grab
           px-2
           text-sm
-          bg-gray-700
+          {/*bg-purple-900*/}
           text-white
           rounded
         "
@@ -263,50 +265,77 @@ export default function MultiSectionsItem({
             {/* ZONA SUPERIOR DERECHA => Toggle + Ojo y Papelera */}
             <div className="absolute top-2 right-2 flex items-center gap-2">
                 {/* Toggle + icono ojo */}
-                <div className="flex items-center gap-1">
-                    <Switch
-                        className="
-              data-[state=checked]:bg-green-500
-              data-[state=unchecked]:bg-red-500
-            "
-                        checked={link.visible}
-                        onCheckedChange={toggleVisible}
-                    />
-                    {link.visible ? <EyeIcon/> : <EyeSlashIcon/>}
-                </div>
                 {/* Botón Borrar */}
-                <Button variant="destructive" className="text-xs px-2 py-1" onClick={handleDeleteClick}>
+                <Button variant="destructive" className="text-xs px-2 py-1 hover:bg-purple-900"
+                        onClick={handleDeleteClick}>
                     <TrashIcon/>
                 </Button>
+
+                <div className="flex items-center gap-1">
+                    <Toggle
+                        className="
+            {/*bg-gray-700*/}
+            hover:bg-purple-900
+            {/*data-[state=on]:bg-purple-700*/}
+            {/*data-[state=off]:bg-red-600*/}
+            rounded-full
+            w-12 h-6
+            flex items-center justify-center
+          "
+                        pressed={link.visible}
+                        onPressedChange={toggleVisible}
+                    >
+                        {link.visible ? <EyeIcon/> : <EyeSlashIcon/>}
+                    </Toggle>
+                </div>
             </div>
 
             {/* CONTENIDO principal => flex row: text fields en el centro, imagen a la derecha */}
             <div className="mt-8 flex items-start justify-between gap-4">
                 {/* 1) Campos Título y URL */}
                 <div className="flex flex-col gap-2 flex-1">
-                    {/* Título con icono a la derecha */}
+                    {/* Título con icono a la IZQUIERDA => icon + input */}
                     <div className="relative">
+            <span className="absolute inset-y-0 left-2 flex items-center pointer-events-none">
+              <TitleIcon/>
+            </span>
                         <Input
                             value={title}
                             onChange={(e) => handleTitleChange(e.target.value)}
                             placeholder="Título"
-                            className="w-full text-sm pr-8 px-2 py-1"
+                            className="
+                w-full text-sm
+                pl-8 pr-2 py-1
+                rounded-[100]
+                hover:bg-purple-950/40
+                focus:bg-purple-950/40
+                bg-black/50
+                border-gray-400
+                focus-visible:ring-0
+              "
                         />
-                        <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none">
-                            <TitleIcon/>
-                        </div>
                     </div>
-                    {/* URL con icono a la derecha */}
+
+                    {/* URL con icono a la IZQUIERDA => icon + input */}
                     <div className="relative">
+            <span className="absolute inset-y-0 left-2 flex items-center pointer-events-none">
+              <LinkIcon/>
+            </span>
                         <Input
                             value={url}
                             onChange={(e) => handleUrlChange(e.target.value)}
                             placeholder="URL"
-                            className="w-full text-sm pr-8 px-2 py-1"
+                            className="
+                w-full text-sm
+                pl-8 pr-2 py-1
+                rounded-[100]
+                hover:bg-purple-950/40
+                focus:bg-purple-950/40
+                bg-black/50
+                border-gray-400
+                focus-visible:ring-0
+              "
                         />
-                        <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none">
-                            <LinkIcon/>
-                        </div>
                     </div>
                 </div>
 
@@ -317,7 +346,7 @@ export default function MultiSectionsItem({
                             <img
                                 src={image}
                                 alt={title}
-                                className="w-full h-full object-cover rounded"
+                                className="w-full h-full object-cover rounded-xl"
                             />
                             {/* Botón X superpuesto */}
                             <button
@@ -343,7 +372,7 @@ export default function MultiSectionsItem({
                 w-full
                 h-full
                 border-2 border-gray-400 border-dashed
-                rounded
+                rounded-xl
                 flex
                 flex-col
                 items-center

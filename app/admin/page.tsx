@@ -6,6 +6,16 @@ import {LinkData, SectionData} from "./types";
 import MultiSectionsBoard from "./multi-sections-board";
 import SocialLinksPanel from "./social-links-panel";
 
+const LandingIcon = () => {
+    return <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="size-10">
+        <path fill-rule="evenodd"
+              d="M16.403 12.652a3 3 0 0 0 0-5.304 3 3 0 0 0-3.75-3.751 3 3 0 0 0-5.305 0 3 3 0 0 0-3.751 3.75 3 3 0 0 0 0 5.305 3 3 0 0 0 3.75 3.751 3 3 0 0 0 5.305 0 3 3 0 0 0 3.751-3.75Zm-2.546-4.46a.75.75 0 0 0-1.214-.883l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
+              clip-rule="evenodd"/>
+    </svg>
+
+
+}
+
 export default function AdminPage() {
     const [links, setLinks] = useState<LinkData[]>([]);
     const [sections, setSections] = useState<SectionData[]>([]);
@@ -124,8 +134,12 @@ export default function AdminPage() {
         <div className="flex flex-col md:flex-row min-h-screen">
             {/* Panel izquierdo */}
             <div className="md:w-[56.666%] p-4 border-b md:border-b-0 md:border-r border-gray-600">
-                <h1 className="text-2xl font-bold mb-4">Panel de Administración</h1>
-
+                <div className={"flex items-center"}>
+                    <span className={'top[10]'}>
+                <LandingIcon/>
+                        </span>
+                    <h1 className="text-2xl font-bold mb-4 pt-3 pl-2">Art0xDev Landing </h1>
+                </div>
                 <MultiSectionsBoard
                     links={links}
                     setLinks={setLinks}

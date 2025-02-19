@@ -62,7 +62,7 @@ function PencilIcon() {
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth="1.5"
-            stroke="black"
+            stroke="white"
             className="size-5"
         >
             <path
@@ -86,7 +86,7 @@ function TrashIcon() {
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth="1.5"
-            stroke="black"
+            stroke="white"
             className="size-5"
         >
             <path
@@ -95,6 +95,18 @@ function TrashIcon() {
                 d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673A2.25 2.25 0 0 1 15.916 21H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397M4.75 5.75h14.5"
             />
         </svg>
+    );
+}
+
+function SectionIcon() {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="size-5">
+            <path
+                d="M2 4.25A2.25 2.25 0 0 1 4.25 2h6.5A2.25 2.25 0 0 1 13 4.25V5.5H9.25A3.75 3.75 0 0 0 5.5 9.25V13H4.25A2.25 2.25 0 0 1 2 10.75v-6.5Z"/>
+            <path
+                d="M9.25 7A2.25 2.25 0 0 0 7 9.25v6.5A2.25 2.25 0 0 0 9.25 18h6.5A2.25 2.25 0 0 0 18 15.75v-6.5A2.25 2.25 0 0 0 15.75 7h-6.5Z"/>
+        </svg>
+
     );
 }
 
@@ -179,7 +191,8 @@ export default function MultiSectionsContainer({
     }
 
     return (
-        <div ref={setNodeRef} className="border border-purple-900 p-4 rounded bg-black">
+        <div ref={setNodeRef}
+             className="border-dashed border border-purple-900 p-4 rounded bg-black hover:bg-purple-950/10">
             <div className="flex items-center justify-between mb-2">
                 {isEditingSection && sec ? (
                     <div className="flex items-center gap-2">
@@ -212,7 +225,7 @@ export default function MultiSectionsContainer({
                         {!hideUp && (
                             <button
                                 onClick={() => moveSectionUp(sec.id)}
-                                className="bg-black text-white rounded p-1"
+                                className="bg-black text-white rounded p-1 hover:bg-purple-950"
                                 aria-label="Subir sección"
                             >
                                 <ArrowUpIcon/>
@@ -221,7 +234,7 @@ export default function MultiSectionsContainer({
                         {!hideDown && (
                             <button
                                 onClick={() => moveSectionDown(sec.id)}
-                                className="bg-black text-white rounded p-1"
+                                className="bg-black text-white rounded p-1 hover:bg-purple-950"
                                 aria-label="Bajar sección"
                             >
                                 <ArrowDownIcon/>
@@ -229,20 +242,20 @@ export default function MultiSectionsContainer({
                         )}
                         <button
                             onClick={() => onCreateLinkInSection(containerId)}
-                            className="bg-black text-white rounded p-1 flex items-center gap-1"
+                            className="bg-black text-white rounded p-1 flex items-center gap-1 hover:bg-purple-950"
                         >
                             <AddLink/>
                             <span className="hidden sm:inline">Link</span>
                         </button>
                         <button
                             onClick={() => setIsEditingSection(true)}
-                            className="bg-gray-300 text-white px-1 py-1 rounded flex items-center gap-1"
+                            className="px-1 py-1 rounded flex items-center gap-1 hover:bg-purple-950"
                         >
                             <PencilIcon/>
                         </button>
                         <button
                             onClick={handleDeleteClick}
-                            className="bg-gray-300 text-white px-1 py-1 rounded flex items-center"
+                            className="px-1 py-1 rounded flex items-center hover:bg-purple-950"
                         >
                             <TrashIcon/>
                         </button>
