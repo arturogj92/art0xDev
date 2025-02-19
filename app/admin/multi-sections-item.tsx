@@ -8,22 +8,8 @@ import {Input} from "@/components/ui/input";
 import {Switch} from "@/components/ui/switch";
 import {LinkData} from "./types";
 
-/** Iconos pequeños para cada campo */
-function TitleIcon() {
-    return (
-        <svg
-            className="w-4 h-4 text-gray-300"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.5}
-            viewBox="0 0 24 24"
-        >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 8.25h15M4.5 12h9m-9 3.75h15"/>
-        </svg>
-    );
-}
-
-function LinkIcon() {
+/** Iconos pequeños */
+function EyeIcon() {
     return (
         <svg
             className="w-4 h-4 text-gray-300"
@@ -35,16 +21,72 @@ function LinkIcon() {
             <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="M13.5 6.75h3.75a2.25 2.25 0 0 1
-                2.25 2.25v6a2.25 2.25 0 0 1-2.25
-                2.25H13.5m-3 0H6.75a2.25 2.25 0 0
-                1-2.25-2.25v-6a2.25 2.25 0 0
-                1 2.25-2.25H10.5"
+                d="M3.98 8.223C5.75 5.546 8.473 3.75 12 3.75s6.25 1.796 8.02 4.473a12.082 12.082 0 0 1 1.845 3.152.75.75 0 0 1 0 .75c-.47 1.016-1.1 1.996-1.845 3.152C18.25 18.454 15.527 20.25 12 20.25s-6.25-1.796-8.02-4.473a12.082 12.082 0 0 1-1.845-3.152.75.75 0 0 1 0-.75 12.082 12.082 0 0 1 1.845-3.152z"
+            />
+            <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"
             />
         </svg>
     );
 }
 
+function EyeSlashIcon() {
+    return (
+        <svg
+            className="w-4 h-4 text-gray-300"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.5}
+            viewBox="0 0 24 24"
+        >
+            <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3.98 8.223C5.75 5.546 8.473 3.75 12 3.75c1.467 0 2.84.254 4.084.718M20.02
+           8.223c.745 1.156 1.375 2.136 1.845 3.152a.75.75 0 0 1 0 .75 12.082 12.082 0 0 1-1.845
+           3.152c-1.77 2.677-4.493 4.473-8.02 4.473-1.45 0-2.82-.25-4.06-.708M9.53 9.53l4.94
+           4.94M9.53 14.47l4.94-4.94"
+            />
+        </svg>
+    );
+}
+
+function TitleIcon() {
+    return (
+        <svg
+            className="w-4 h-4 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.5}
+            viewBox="0 0 24 24"
+        >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 8.25h15M4.5 12h9m-9 3.75h15"/>
+        </svg>
+    );
+}
+function LinkIcon() {
+    return (
+        <svg
+            className="w-4 h-4 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.5}
+            viewBox="0 0 24 24"
+        >
+            <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M13.5 6.75h3.75a2.25 2.25 0 0 1
+           2.25 2.25v6a2.25 2.25 0 0 1-2.25
+           2.25H13.5m-3 0H6.75a2.25 2.25 0 0
+           1-2.25-2.25v-6a2.25 2.25 0 0
+           1 2.25-2.25H10.5"
+            />
+        </svg>
+    );
+}
 function TrashIcon() {
     return (
         <svg
@@ -70,6 +112,20 @@ function TrashIcon() {
     );
 }
 
+function CloseIcon() {
+    return (
+        <svg
+            className="w-3 h-3"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            viewBox="0 0 24 24"
+        >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12"/>
+        </svg>
+    );
+}
+
 interface MultiSectionsItemProps {
     link: LinkData;
     onUpdateLink: (id: string, updates: Partial<LinkData>) => void;
@@ -81,7 +137,6 @@ export default function MultiSectionsItem({
                                               onUpdateLink,
                                               onDeleteLink,
                                           }: MultiSectionsItemProps) {
-    // Drag & drop
     const {
         setNodeRef,
         setActivatorNodeRef,
@@ -100,52 +155,48 @@ export default function MultiSectionsItem({
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-    // Estado local (modo edición permanente)
+    // Estado "edición permanente"
     const [title, setTitle] = useState(link.title);
     const [url, setUrl] = useState(link.url);
     const [image, setImage] = useState(link.image ?? "");
 
-    // Referencia al input "file" oculto
+    // Para subir imagen
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     function handleTitleChange(val: string) {
         setTitle(val);
         onUpdateLink(link.id, {title: val});
     }
-
     function handleUrlChange(val: string) {
         setUrl(val);
         onUpdateLink(link.id, {url: val});
     }
 
-    // -- Subir imagen => envía a /api/images
+    function toggleVisible(checked: boolean) {
+        onUpdateLink(link.id, {visible: checked});
+    }
+
+    // Subir imagen => /api/images
     async function handleSelectFile(e: React.ChangeEvent<HTMLInputElement>) {
         if (!e.target.files || e.target.files.length === 0) return;
         const file = e.target.files[0];
-        // Convertir a Base64
         const reader = new FileReader();
         reader.onload = async () => {
-            const fullBase64 = reader.result as string;  // "data:image/png;base64,AAAA..."
-
-            // 1. Separar la cabecera ("data:...base64,") del contenido real
-            const splitted = fullBase64.split(","); // splitted[0] = "data:image/png;base64"
-            // splitted[1] = "AAAA..."
-            const pureBase64 = splitted[1];        // la parte pura
+            const fullBase64 = reader.result as string;
+            const splitted = fullBase64.split(",");
+            const pureBase64 = splitted[1];
 
             try {
                 const res = await fetch("/api/images", {
                     method: "POST",
                     headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify({
-                        base64: pureBase64, // <--- solo la parte base64
-                    }),
+                    body: JSON.stringify({base64: pureBase64}),
                 });
                 const data = await res.json();
                 if (!res.ok) {
                     console.error("Error al subir imagen:", data.error);
                     return;
                 }
-                // data.url => la URL pública devuelta
                 setImage(data.url);
                 onUpdateLink(link.id, {image: data.url});
             } catch (error) {
@@ -156,18 +207,11 @@ export default function MultiSectionsItem({
     }
 
     function handleUploadClick() {
-        // Dispara el click del file input
         fileInputRef.current?.click();
     }
-
     function handleRemoveImage() {
-        // Podrías llamar a DELETE /api/images?fileName=xxx si quisieras borrarla del server
         setImage("");
         onUpdateLink(link.id, {image: ""});
-    }
-
-    function toggleVisible(checked: boolean) {
-        onUpdateLink(link.id, { visible: checked });
     }
 
     function handleDeleteClick() {
@@ -186,131 +230,161 @@ export default function MultiSectionsItem({
             ref={setNodeRef}
             style={style}
             className="
+        relative
         border border-gray-500
-        p-3
+        p-4
         rounded-2xl
         bg-black/40
         text-white
-        flex
-        gap-3
+        min-h-[5rem]
       "
         >
-            {/* Drag handle a la izquierda (centrado verticalmente) */}
+            {/* HANDLE => arriba a la izquierda, con algo de padding */}
             <div
+                ref={setActivatorNodeRef}
+                {...attributes}
+                {...listeners}
                 className="
+          absolute
+          top-2
+          left-2
           cursor-grab
           px-2
-          select-none
           text-sm
           bg-gray-700
           text-white
           rounded
-          self-center
-          h-fit
         "
-                ref={setActivatorNodeRef}
-                {...attributes}
-                {...listeners}
             >
                 ☰
             </div>
 
-            {/* Contenedor principal */}
-            <div className="flex-1 flex flex-col gap-2">
-                {/* Título */}
-                <div className="flex items-center gap-1 w-full">
-                    <TitleIcon/>
-                    <Input
-                        value={title}
-                        onChange={(e) => handleTitleChange(e.target.value)}
-                        placeholder="Título"
-                        className="w-full text-sm px-2 py-1"
-                    />
-                </div>
+            {/* BOTÓN BORRAR => arriba a la derecha */}
+            <div className="absolute top-2 right-2">
+                <Button variant="destructive" className="text-xs px-2 py-1" onClick={handleDeleteClick}>
+                    <TrashIcon/>
+                </Button>
+            </div>
 
-                {/* URL */}
-                <div className="flex items-center gap-1 w-full">
-                    <LinkIcon/>
-                    <Input
-                        value={url}
-                        onChange={(e) => handleUrlChange(e.target.value)}
-                        placeholder="URL"
-                        className="w-full text-sm px-2 py-1"
-                    />
-                </div>
-
-                {/* Imagen */}
+            {/* CONTENIDO => flex row: left => toggle, center => fields, right => image */}
+            <div className="mt-8 flex items-start justify-between gap-4">
+                {/* 1) Toggle + ojo */}
                 <div className="flex items-center gap-2">
-                    {/* Botón "Subir Imagen" / "Quitar" */}
-                    <div className="flex flex-col">
-                        {image ? (
+                    <Switch
+                        className="
+              data-[state=checked]:bg-green-500
+              data-[state=unchecked]:bg-red-500
+            "
+                        checked={link.visible}
+                        onCheckedChange={toggleVisible}
+                    />
+                    {link.visible ? <EyeIcon/> : <EyeSlashIcon/>}
+                </div>
+
+                {/* 2) Campos Título y URL */}
+                <div className="flex flex-col gap-2 flex-1">
+                    {/* Título con icono a la derecha */}
+                    <div className="relative">
+                        <Input
+                            value={title}
+                            onChange={(e) => handleTitleChange(e.target.value)}
+                            placeholder="Título"
+                            className="w-full text-sm pr-8 px-2 py-1"
+                        />
+                        <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none">
+                            <TitleIcon/>
+                        </div>
+                    </div>
+                    {/* URL con icono a la derecha */}
+                    <div className="relative">
+                        <Input
+                            value={url}
+                            onChange={(e) => handleUrlChange(e.target.value)}
+                            placeholder="URL"
+                            className="w-full text-sm pr-8 px-2 py-1"
+                        />
+                        <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none">
+                            <LinkIcon/>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 3) Imagen (a la derecha) */}
+                <div className="relative w-20 h-20 flex-shrink-0">
+                    {image ? (
+                        <>
                             <img
                                 src={image}
                                 alt={title}
-                                className="max-h-[5rem] w-auto object-cover rounded"
+                                className="w-full h-full object-cover rounded"
                             />
-                        ) : (
-                            <div
-                                className="text-xs text-gray-500 italic w-20 h-10 flex items-center justify-center border border-gray-400 rounded">
-                                Sin imagen
-                            </div>
-                        )}
-                        <div className="flex gap-1 mt-1">
-                            {!image && (
-                                <Button variant="secondary" size="sm" onClick={handleUploadClick}>
-                                    Subir
-                                </Button>
-                            )}
-                            {image && (
-                                <Button variant="secondary" size="sm" onClick={handleRemoveImage}>
-                                    Quitar
-                                </Button>
-                            )}
-                        </div>
-                        {/* Input oculto */}
-                        <input
-                            type="file"
-                            accept="image/*"
-                            ref={fileInputRef}
-                            onChange={handleSelectFile}
-                            className="hidden"
-                        />
-                    </div>
-                </div>
-
-                {/* Footer => Toggle Visible + Botón Borrar */}
-                <div className="flex items-center justify-between mt-1">
-                    {/* Toggle Visible a la izquierda */}
-                    <div className="flex items-center gap-2">
-                        <Switch
+                            {/* Botón X superpuesto */}
+                            <button
+                                type="button"
+                                onClick={handleRemoveImage}
+                                className="
+                  absolute
+                  top-1
+                  right-1
+                  bg-black/60
+                  text-white
+                  rounded-full
+                  p-1
+                  hover:bg-black/80
+                "
+                            >
+                                <CloseIcon/>
+                            </button>
+                        </>
+                    ) : (
+                        <div
                             className="
-                data-[state=checked]:bg-green-500
-                data-[state=unchecked]:bg-red-500
+                w-full
+                h-full
+                border-2 border-gray-400 border-dashed
+                rounded
+                flex
+                flex-col
+                items-center
+                justify-center
+                text-xs
+                text-gray-500
+                gap-1
               "
-                            checked={link.visible}
-                            onCheckedChange={toggleVisible}
-                        />
-                        <span className="text-xs">Visible</span>
-                    </div>
-
-                    {/* Botón Borrar a la derecha */}
-                    <Button
-                        variant="destructive"
-                        onClick={handleDeleteClick}
-                        className="text-xs px-2 py-1"
-                    >
-                        <TrashIcon/>
-                    </Button>
+                        >
+                            <span>Sin imagen</span>
+                            <button
+                                onClick={handleUploadClick}
+                                className="
+                  text-[10px]
+                  bg-white/10
+                  px-2
+                  py-1
+                  rounded
+                  hover:bg-white/20
+                "
+                            >
+                                Subir
+                            </button>
+                        </div>
+                    )}
+                    <input
+                        type="file"
+                        accept="image/*"
+                        ref={fileInputRef}
+                        onChange={handleSelectFile}
+                        className="hidden"
+                    />
                 </div>
             </div>
 
-            {/* Modal de borrado */}
+            {/* MODAL de confirmación de borrado */}
             {showDeleteModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
                     <div className="bg-black w-full max-w-sm mx-auto p-4 rounded shadow-lg">
                         <p className="mb-4">¿Seguro que deseas borrar este enlace?</p>
                         <div className="flex justify-end gap-2">
-                            <Button variant="secondary" onClick={cancelDelete}>
+                            <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
                                 Cancelar
                             </Button>
                             <Button variant="destructive" onClick={confirmDelete}>
