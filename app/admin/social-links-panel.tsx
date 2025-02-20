@@ -80,7 +80,7 @@ export default function SocialLinksPanel({onReorder}: SocialLinksPanelProps) {
     }
 
     return (
-        <div className="border p-4 my-8 border-purple-900">
+        <div className="border p-4 my-8 border-blue-900 border-dashed">
             <h2 className="text-lg font-semibold">Social Links</h2>
             <DndContext
                 sensors={sensors}
