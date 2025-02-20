@@ -3,6 +3,8 @@ import {supabaseAdmin} from "@/lib/supabase";
 import {LinkData, SectionData} from "./admin/types";
 import LandingPreview from "@/app/landing-content";
 
+export const revalidate = 0;
+
 export default async function Home() {
     // Cargar secciones
     const { data: sectionsData, error: secError } = await supabaseAdmin
