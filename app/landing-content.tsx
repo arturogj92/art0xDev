@@ -39,12 +39,13 @@ export default function LandingPreview({sections, links}: LandingPreviewProps) {
 
                 return (
                     <Section key={sec.id} title={sec.title}>
-                        {secLinks.map((link) => (
+                        {secLinks.map((link, index) => (
                             <LinkButton
                                 key={link.id}
                                 iconUrl={link.image || ""}
                                 title={link.title}
                                 url={link.url}
+                                index={index}
                             />
                         ))}
                     </Section>

@@ -1,15 +1,8 @@
 "use client";
 
-import { FC, useEffect, useState } from "react";
-import {
-    FaInstagram,
-    FaYoutube,
-    FaTiktok,
-    FaGithub,
-    FaXTwitter,
-    FaLinkedin,
-} from "react-icons/fa6";
-import { SocialLinkData } from "@/app/admin/types";
+import {FC, useEffect, useState} from "react";
+import {FaGithub, FaInstagram, FaLinkedin, FaTiktok, FaXTwitter, FaYoutube,} from "react-icons/fa6";
+import {SocialLinkData} from "@/app/admin/types";
 
 // Mapeo name => icon
 function getSocialIcon(name: string) {
@@ -54,15 +47,22 @@ const SocialLinks: FC = () => {
 
     return (
         <div className="flex justify-center gap-4 mt-8">
-            {visibleLinks.map((link) => {
+            {visibleLinks.map((link, index) => {
                 const Icon = getSocialIcon(link.name);
                 if (!Icon) return null;
+
                 return (
                     <a
                         key={link.id}
                         href={link.url}
                         target="_blank"
                         rel="noopener noreferrer"
+                        className={`
+              transition-transform
+              duration-200
+              hover:scale-110
+              inline-flex items-center
+              `}
                     >
                         {Icon}
                     </a>

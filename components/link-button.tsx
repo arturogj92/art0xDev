@@ -8,9 +8,10 @@ interface LinkButtonProps {
     title: string;
     url: string;
     iconUrl: string;
+    index: number;
 }
 
-export default function LinkButton({ title, url, iconUrl }: LinkButtonProps) {
+export default function LinkButton({title, url, iconUrl, index}: LinkButtonProps) {
     return (
         <Link href={url} legacyBehavior>
             <a
@@ -18,7 +19,20 @@ export default function LinkButton({ title, url, iconUrl }: LinkButtonProps) {
                 target="_blank"
                 rel="noopener noreferrer"
             >
-                <Button variant="outline" className="w-full h-auto p-0">
+                <Button variant="outline" className={`
+                    w-full 
+                    h-auto 
+                    p-0 
+                    duration-300 
+                    transition-transform 
+                    hover:scale-105 
+                                  ${
+                    // Solo al primer enlace le damos un estilo extra:
+                    index === 0
+                        ? "shadow-[0_0_24px_3px_#67096b]"
+                        : ""
+                }
+                `}>
                     <div className="grid grid-cols-[64px_1fr] gap-2 items-center w-full">
                         <div className="relative w-16 h-16 bg-gray-200">
                             <Image src={iconUrl} alt="Icono" fill className="object-cover "/>
