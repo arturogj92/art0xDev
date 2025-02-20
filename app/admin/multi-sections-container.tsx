@@ -221,7 +221,7 @@ export default function MultiSectionsContainer({
                     </div>
                 ) : (
                     <h3 className="font-semibold text-lg">
-                        {isNoSection ? "Sin Sección" : sec?.title}
+                        {isNoSection ? "Sin Sección (estos enlaces no serán visibles)" : sec?.title}
                     </h3>
                 )}
 
