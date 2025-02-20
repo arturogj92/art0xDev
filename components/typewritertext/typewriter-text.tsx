@@ -2,10 +2,15 @@
 
 import "./typewriter.css";
 
-export default function TypewriterText() {
+interface TypewriterTextProps {
+    text: string;
+}
+
+
+export default function TypewriterText({text}: TypewriterTextProps) {
     return (
         <span className="typewriter">
-      ¡Aprende programación desde 0 conmigo!
+      {text}
     </span>
     );
 }

@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
         const fileName = `image-${Date.now()}.png`; // Ajusta la extensión si usas JPG, etc.
 
         // Subir al bucket "images"
-        const {data, error} = await supabaseAdmin.storage
+        const {error} = await supabaseAdmin.storage
             .from("images")
             .upload(fileName, buffer, {
                 contentType: "image/png", // Ajusta a la extensión real
@@ -38,8 +38,12 @@ export async function POST(req: NextRequest) {
 
         // Devolvemos también el fileName por si quieres guardarlo
         return NextResponse.json({url: publicUrl, fileName}, {status: 201});
-    } catch (error: any) {
-        return NextResponse.json({error: error.message}, {status: 500});
+    } catch (err: unknown) {
+        const errorObj = err instanceof Error ? err : new Error("Unknown error");
+        return NextResponse.json(
+            {message: 'Error en el servidor', error: errorObj.message},
+            {status: 500}
+        );
     }
 }
 
@@ -63,7 +67,11 @@ export async function DELETE(req: NextRequest) {
         }
 
         return NextResponse.json({success: true}, {status: 200});
-    } catch (error: any) {
-        return NextResponse.json({error: error.message}, {status: 500});
+    } catch (err: unknown) {
+        const errorObj = err instanceof Error ? err : new Error("Unknown error");
+        return NextResponse.json(
+            {message: 'Error en el servidor', error: errorObj.message},
+            {status: 500}
+        );
     }
 }

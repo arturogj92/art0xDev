@@ -27,8 +27,12 @@ export async function POST(req: NextRequest) {
         if (error) throw error;
 
         return NextResponse.json(data?.[0], { status: 201 });
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (err: unknown) {
+        const errorObj = err instanceof Error ? err : new Error("Unknown error");
+        return NextResponse.json(
+            {message: 'Error en el servidor', error: errorObj.message},
+            {status: 500}
+        );
     }
 }
 
@@ -73,8 +77,12 @@ export async function PATCH(req: NextRequest) {
 
             return NextResponse.json(data?.[0], { status: 200 });
         }
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (err: unknown) {
+        const errorObj = err instanceof Error ? err : new Error("Unknown error");
+        return NextResponse.json(
+            {message: 'Error en el servidor', error: errorObj.message},
+            {status: 500}
+        );
     }
 }
 
@@ -94,7 +102,11 @@ export async function DELETE(req: NextRequest) {
         if (error) throw error;
 
         return NextResponse.json({ message: "Link deleted" }, { status: 200 });
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (err: unknown) {
+        const errorObj = err instanceof Error ? err : new Error("Unknown error");
+        return NextResponse.json(
+            {message: 'Error en el servidor', error: errorObj.message},
+            {status: 500}
+        );
     }
 }

@@ -47,7 +47,7 @@ const SocialLinks: FC = () => {
 
     return (
         <div className="flex justify-center gap-4 mt-8">
-            {visibleLinks.map((link, index) => {
+            {visibleLinks.map((link) => {
                 const Icon = getSocialIcon(link.name);
                 if (!Icon) return null;
 

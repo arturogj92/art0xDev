@@ -132,10 +132,6 @@ export function SortableSocialItem({social, onUpdate}: SortableSocialItemProps) 
         onUpdate(social.id, {visible: pressed});
     }
 
-    function handleSelectName(newName: string) {
-        onUpdate(social.id, {name: newName});
-    }
-
     function handleUrlChange(newUrl: string) {
         onUpdate(social.id, {url: newUrl});
     }

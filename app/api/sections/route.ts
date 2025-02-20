@@ -1,6 +1,6 @@
 // app/api/sections/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase";
+import {NextRequest, NextResponse} from "next/server";
+import {supabaseAdmin} from "@/lib/supabase";
 
 export async function GET() {
     const { data, error } = await supabaseAdmin
@@ -24,8 +24,12 @@ export async function POST(req: NextRequest) {
         if (error) throw error;
 
         return NextResponse.json(data?.[0], { status: 201 });
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (err: unknown) {
+        const errorObj = err instanceof Error ? err : new Error("Unknown error");
+        return NextResponse.json(
+            {message: 'Error en el servidor', error: errorObj.message},
+            {status: 500}
+        );
     }
 }
 
@@ -52,8 +56,12 @@ export async function PATCH(req: NextRequest) {
             if (error) throw error;
             return NextResponse.json(data?.[0], { status: 200 });
         }
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (err: unknown) {
+        const errorObj = err instanceof Error ? err : new Error("Unknown error");
+        return NextResponse.json(
+            {message: 'Error en el servidor', error: errorObj.message},
+            {status: 500}
+        );
     }
 }
 
@@ -68,7 +76,11 @@ export async function DELETE(req: NextRequest) {
         if (error) throw error;
 
         return NextResponse.json({ message: "Section deleted" }, { status: 200 });
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (err: unknown) {
+        const errorObj = err instanceof Error ? err : new Error("Unknown error");
+        return NextResponse.json(
+            {message: 'Error en el servidor', error: errorObj.message},
+            {status: 500}
+        );
     }
 }
