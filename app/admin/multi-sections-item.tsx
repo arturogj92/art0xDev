@@ -377,7 +377,7 @@ export default function MultiSectionsItem({
                             <img
                                 src={image}
                                 alt={title}
-                                className="w-full h-full object-cover rounded-xl"
+                                className="w-full h-full object-cover rounded-xl "
                             />
                             {/* X => remove image */}
                             <button

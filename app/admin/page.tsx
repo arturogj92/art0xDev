@@ -212,7 +212,6 @@ export default function AdminPage() {
               rounded-[80px]
             "
                     >
-                        {/* Refresh with ?r=refreshCount */}
                         <iframe
                             key={refreshCount}
                             src={`/?r=${refreshCount}`}
