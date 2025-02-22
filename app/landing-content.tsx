@@ -29,13 +29,17 @@ export default function LandingPreview({sections, links}: LandingPreviewProps) {
             />
 
             {/* Secciones con sus enlaces visibles */}
-            {sections.map((sec) => {
+            {sections.map((sec, indexSection) => {
                 // Filtrar y ordenar enlaces de la sección
                 const secLinks = links
                     .filter((l) => l.section_id === sec.id && l.visible)
                     .sort((a, b) => a.position - b.position);
 
                 if (secLinks.length === 0) return null;
+
+                function isHighlighted(index: number, indexSection: number) {
+                    return index === 0 && indexSection === 0;
+                }
 
                 return (
                     <Section key={sec.id} title={sec.title}>
@@ -45,7 +49,7 @@ export default function LandingPreview({sections, links}: LandingPreviewProps) {
                                 iconUrl={link.image || ""}
                                 title={link.title}
                                 url={link.url}
-                                index={index}
+                                isHighlighted={isHighlighted(index, indexSection)}
                             />
                         ))}
                     </Section>

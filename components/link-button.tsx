@@ -8,10 +8,10 @@ interface LinkButtonProps {
     title: string;
     url: string;
     iconUrl: string;
-    index: number;
+    isHighlighted: boolean;
 }
 
-export default function LinkButton({title, url, iconUrl, index}: LinkButtonProps) {
+export default function LinkButton({title, url, iconUrl, isHighlighted}: LinkButtonProps) {
     return (
         <Link href={url} legacyBehavior>
             <a
@@ -28,7 +28,7 @@ export default function LinkButton({title, url, iconUrl, index}: LinkButtonProps
                     hover:scale-105 
                                   ${
                     // Solo al primer enlace le damos un estilo extra:
-                    index === 0
+                    isHighlighted
                         ? "shadow-[0_0_24px_3px_#67096b]"
                         : ""
                 }
