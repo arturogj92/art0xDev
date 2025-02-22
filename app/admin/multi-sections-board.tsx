@@ -26,7 +26,6 @@ interface MultiSectionsBoardProps {
     onDeleteLink: (id: string) => void;
     onUpdateSection: (id: string, updates: Partial<SectionData>) => void;
     onDeleteSection: (id: string) => void;
-    /** Called whenever a link or section is reordered, so you can refresh the iframe. */
     onLinksReordered?: () => void;
 }
 
