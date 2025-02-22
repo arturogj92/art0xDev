@@ -19,7 +19,7 @@ interface LandingPreviewProps {
  */
 export default function LandingPreview({sections, links}: LandingPreviewProps) {
     return (
-        <div className="min-h-[500px] bg-gradient-to-b from-black to-fuchsia-950 p-4">
+        <div className="flex flex-col min-h-screen bg-gradient-to-b from-black to-fuchsia-950 p-4">
 
             <Header
                 name="Art0xDev"
