@@ -4,7 +4,7 @@ import {createClient} from '@supabase/supabase-js';
 import bcrypt from 'bcryptjs';
 import {SignJWT} from 'jose';
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
