@@ -10,25 +10,43 @@ import {LinkData} from "./types";
 
 // shadcn/ui + Recharts
 import {Card, CardContent, CardDescription, CardHeader, CardTitle,} from "@/components/ui/card";
-import {Bar, BarChart, CartesianGrid, Cell, Tooltip as RechartsTooltip, XAxis, YAxis,} from "recharts";
+import {
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Cell,
+    ResponsiveContainer,
+    Tooltip as RechartsTooltip,
+    XAxis,
+    YAxis,
+} from "recharts";
 
+// Interfaz de los datos diarios
 interface DailyStat {
     date: string;
     count: number;
     countries: Record<string, number>;
 }
 
-interface Payload {
-    value: string,
-    length: number,
-}
-
+// Interfaz para la respuesta de stats
 interface StatsData {
     selected: number;
     global: number;
     variation: number;
     dailyStats: DailyStat[];
     byCountry: Record<string, number>;
+}
+
+// Interfaz para el payload del tooltip Recharts
+interface TooltipItem {
+    name: string;
+    value: number;
+    color: string;
+    payload: {
+        date: string;
+        count: number;
+        countries: Record<string, number>;
+    };
 }
 
 function HandleIcon() {
@@ -44,32 +62,7 @@ function HandleIcon() {
             <path
                 fillRule="evenodd"
                 clipRule="evenodd"
-                d="M9.5 8C10.3284 8 11 7.32843 11 6.5C11
-           5.67157 10.3284 5 9.5 5C8.67157 5 8
-           5.67157 8 6.5C8 7.32843 8.67157 8
-           9.5 8ZM9.5 14C10.3284 14 11
-           13.3284 11 12.5C11 11.67157 10.3284
-           11 9.5 11C8.67157 11 8 11.67157 8
-           12.5C8 13.3284 8.67157 14 9.5
-           14ZM11 18.5C11 19.3284 10.3284 20
-           9.5 20C8.67157 20 8 19.3284 8
-           18.5C8 17.67157 8.67157 17 9.5
-           17C10.3284 17 11 17.67157 11
-           18.5ZM15.5 8C16.3284 8 17
-           7.32843 17 6.5C17 5.67157
-           16.3284 5 15.5 5C14.67157
-           5 14 5.67157 14 6.5C14
-           7.32843 14.67157 8 15.5
-           8ZM17 12.5C17 13.3284 16.3284
-           14 15.5 14C14.67157 14 14
-           13.3284 14 12.5C14 11.67157
-           14.67157 11 15.5 11C16.3284
-           11 17 11.67157 17 12.5ZM15.5
-           20C16.3284 20 17 19.3284 17
-           18.5C17 17.67157 16.3284 17
-           15.5 17C14.67157 17 14
-           17.67157 14 18.5C14 19.3284
-           14.67157 20 15.5 20Z"
+                d="M9.5 8C10.3284 8 11 7.32843 11 6.5C11 5.67157 10.3284 5 9.5 5C8.67157 5 8 5.67157 8 6.5C8 7.32843 8.67157 8 9.5 8ZM9.5 14C10.3284 14 11 13.3284 11 12.5C11 11.67157 10.3284 11 9.5 11C8.67157 11 8 11.67157 8 12.5C8 13.3284 8.67157 14 9.5 14ZM11 18.5C11 19.3284 10.3284 20 9.5 20C8.67157 20 8 19.3284 8 18.5C8 17.67157 8.67157 17 9.5 17C10.3284 17 11 17.67157 11 18.5ZM15.5 8C16.3284 8 17 7.32843 17 6.5C17 5.67157 16.3284 5 15.5 5C14.6716 5 14 5.67157 14 6.5C14 7.32843 14.6716 8 15.5 8ZM17 12.5C17 13.3284 16.3284 14 15.5 14C14.6716 14 14 13.3284 14 12.5C14 11.67157 14.6716 11 15.5 11C16.3284 11 17 11.67157 17 12.5ZM15.5 20C16.3284 20 17 19.3284 17 18.5C17 17.67157 16.3284 17 15.5 17C14.6716 17 14 17.67157 14 18.5C14 19.3284 14.6716 20 15.5 20Z"
                 fill="#121923"
             />
         </svg>
@@ -84,11 +77,10 @@ function StatsIcon() {
             fill="currentColor"
             className="size-5"
         >
-            <path d="M12 9a1 1 0 0 1-1-1V3c0-.552.45-1.007.997-.93a7.004
-               7.004 0 0 1 5.933 5.933c.078.547-.378.997-.93.997h-5Z"/>
-            <path d="M8.003 4.07C8.55 3.994 9 4.449 9 5v5a1 1 0 0 0 1
-               1h5c.552 0 1.008.45.93.997A7.001 7.001 0 0 1
-               2 11a7.002 7.002 0 0 1 6.003-6.93Z"/>
+            <path
+                d="M12 9a1 1 0 0 1-1-1V3c0-.552.45-1.007.997-.93a7.004 7.004 0 0 1 5.933 5.933c.078.547-.378.997-.93.997h-5Z"/>
+            <path
+                d="M8.003 4.07C8.55 3.994 9 4.449 9 5v5a1 1 0 0 0 1 1h5c.552 0 1.008.45.93.997A7.001 7.001 0 0 1 2 11a7.002 7.002 0 0 1 6.003-6.93Z"/>
         </svg>
     );
 }
@@ -236,7 +228,7 @@ function CloseIcon() {
     );
 }
 
-// Banderas
+// Banderas (por si necesitas más)
 const countryFlags: Record<string, string> = {
     US: "🇺🇸",
     RU: "🇷🇺",
@@ -261,6 +253,7 @@ const countryFlags: Record<string, string> = {
     BO: "🇧🇴",
 };
 
+// Helper para extraer el nombre de archivo
 function getFileNameFromUrl(url: string): string | null {
     try {
         const parts = url.split("/");
@@ -270,16 +263,15 @@ function getFileNameFromUrl(url: string): string | null {
     }
 }
 
-
-// Tooltip Recharts
+// Tooltip Recharts con tipado
 function CustomTooltip({
                            active,
                            payload,
                            label,
                        }: {
     active?: boolean;
-    payload?: Payload[];
     label?: string;
+    payload?: TooltipItem[];
 }) {
     if (active && payload && payload.length) {
         const dateObj = new Date(label || "");
@@ -288,6 +280,7 @@ function CustomTooltip({
             day: "numeric",
             year: "numeric",
         });
+
         return (
             <div
                 style={{
@@ -349,6 +342,9 @@ export default function MultiSectionsItem({
     const [url, setUrl] = useState(link.url);
     const [image, setImage] = useState(link.image ?? "");
 
+    // Nuevo: url_link_id para stats
+    const [urlLinkId, setUrlLinkId] = useState<number | null>(link.url_link_id ?? null);
+
     const [stats7, setStats7] = useState<StatsData | null>(null);
     const [stats28, setStats28] = useState<StatsData | null>(null);
     const [statsModalOpen, setStatsModalOpen] = useState(false);
@@ -374,6 +370,15 @@ export default function MultiSectionsItem({
     function handleUrlChange(val: string) {
         setUrl(val);
         onUpdateLink(link.id, {url: val});
+    }
+
+    // Actualizar url_link_id
+    function handleLinkIdChange(val: string) {
+        const parsed = parseInt(val, 10);
+        // Si está vacío o no es número => null
+        const newId = Number.isNaN(parsed) ? null : parsed;
+        setUrlLinkId(newId);
+        onUpdateLink(link.id, {url_link_id: newId});
     }
 
     function toggleVisible(pressed: boolean) {
@@ -450,7 +455,7 @@ export default function MultiSectionsItem({
 
     // Llamadas a stats
     async function handleShowStats() {
-        if (!link.url_link_id) {
+        if (!urlLinkId) {
             setStatsError("Este link no tiene url_link_id asignado");
             setStats7(null);
             setStats28(null);
@@ -466,7 +471,7 @@ export default function MultiSectionsItem({
         try {
             // 7d
             const res7 = await fetch(
-                `https://www.art0x.link/api/url/visitStats?url_id=${link.url_link_id}&range=7d`,
+                `https://www.art0x.link/api/url/visitStats?url_id=${urlLinkId}&range=7d`,
                 {
                     method: "GET",
                     headers: {"Content-Type": "application/json"},
@@ -481,7 +486,7 @@ export default function MultiSectionsItem({
 
             // 28d
             const res28 = await fetch(
-                `https://www.art0x.link/api/url/visitStats?url_id=${link.url_link_id}&range=28d`,
+                `https://www.art0x.link/api/url/visitStats?url_id=${urlLinkId}&range=28d`,
                 {
                     method: "GET",
                     headers: {"Content-Type": "application/json"},
@@ -502,6 +507,7 @@ export default function MultiSectionsItem({
     }
 
     function handleOverlayClick(e: React.MouseEvent<HTMLDivElement>) {
+        // Cerrar modal al hacer click fuera del Card
         if (e.target === e.currentTarget) {
             setStatsModalOpen(false);
         }
@@ -542,7 +548,11 @@ export default function MultiSectionsItem({
 
             {/* Botones => top-right */}
             <div className="absolute top-2 right-2 flex items-center gap-2">
-                <Button variant="secondary" className="text-xs px-2 py-1" onClick={handleShowStats}>
+                <Button
+                    variant="secondary"
+                    className="text-xs px-2 py-1 hover:bg-purple-900"
+                    onClick={handleShowStats}
+                >
                     <StatsIcon/>
                 </Button>
 
@@ -556,7 +566,6 @@ export default function MultiSectionsItem({
 
                 <Toggle
                     className="
-            rounded-full
             w-12 h-6
             flex items-center justify-center
             hover:bg-purple-900
@@ -568,7 +577,7 @@ export default function MultiSectionsItem({
                 </Toggle>
             </div>
 
-            {/* Contenido => Título + URL + Imagen */}
+            {/* Contenido => Título + URL + Imagen + ID */}
             <div className="mt-5 flex items-start justify-between gap-4">
                 <div className="flex flex-col gap-2 flex-1">
                     {/* Título */}
@@ -593,26 +602,49 @@ export default function MultiSectionsItem({
                         />
                     </div>
 
-                    {/* URL */}
-                    <div className="relative">
-            <span className="absolute inset-y-0 left-2 flex items-center pointer-events-none">
-              <LinkIcon/>
-            </span>
-                        <Input
-                            value={url}
-                            onChange={(e) => handleUrlChange(e.target.value)}
-                            placeholder="URL"
-                            className="
-                w-full text-sm
-                pl-8 pr-2 py-1
-                rounded-[100px]
-                hover:bg-purple-950/40
-                focus:bg-purple-950/40
-                bg-black/50
-                border-gray-400
-                focus-visible:ring-0
-              "
-                        />
+                    {/* Fila => URL + ID */}
+                    <div className="flex items-center gap-2">
+                        {/* URL con icon */}
+                        <div className="relative w-full">
+              <span className="absolute inset-y-0 left-2 flex items-center pointer-events-none">
+                <LinkIcon/>
+              </span>
+                            <Input
+                                value={url}
+                                onChange={(e) => handleUrlChange(e.target.value)}
+                                placeholder="URL"
+                                className="
+                  w-full text-sm
+                  pl-8 pr-2 py-1
+                  rounded-[100px]
+                  hover:bg-purple-950/40
+                  focus:bg-purple-950/40
+                  bg-black/50
+                  border-gray-400
+                  focus-visible:ring-0
+                "
+                            />
+                        </div>
+
+                        {/* ID */}
+                        <div className="flex items-center gap-1">
+                            <span className="text-xs text-gray-300">ID:</span>
+                            <Input
+                                type="number"
+                                value={urlLinkId?.toString() || ""}
+                                onChange={(e) => handleLinkIdChange(e.target.value)}
+                                placeholder="LinkID"
+                                className="
+                  w-16 text-sm
+                  rounded-[100px]
+                  hover:bg-purple-950/40
+                  focus:bg-purple-950/40
+                  bg-black/50
+                  border-gray-400
+                  focus-visible:ring-0
+                "
+                            />
+                        </div>
                     </div>
                 </div>
 
@@ -721,7 +753,9 @@ export default function MultiSectionsItem({
 
                         <CardHeader>
                             <CardTitle>Estadísticas</CardTitle>
-                            <CardDescription>Resumen de clics y países (7 y 28 días)</CardDescription>
+                            <CardDescription>
+                                Resumen de clics y países (7 y 28 días)
+                            </CardDescription>
                         </CardHeader>
 
                         <CardContent>
@@ -751,43 +785,49 @@ export default function MultiSectionsItem({
                                         </p>
                                     </div>
 
-                                    {/* BarChart => 28 días */}
-                                    <div className="w-full flex justify-center mb-4">
-                                        <BarChart data={stats28.dailyStats} width={960} height={320}>
-                                            {/* Quitamos grid */}
-                                            <CartesianGrid stroke="none"/>
-                                            <XAxis
-                                                dataKey="date"
-                                                tickFormatter={(val) => {
-                                                    const d = new Date(val);
-                                                    return d.toLocaleDateString("es-ES", {
-                                                        month: "short",
-                                                        day: "numeric",
-                                                    });
-                                                }}
-                                            />
-                                            <YAxis/>
-                                            <RechartsTooltip content={<CustomTooltip/>}
-                                                             cursor={{fill: "gray", fillOpacity: 0.5}}/>
-                                            <Bar dataKey="count">
-                                                {/* Mapeamos para hover gris */}
-                                                {stats28.dailyStats.map((entry, index) => (
-                                                    <Cell
-                                                        key={`cell-${index}`}
-                                                        fill="hsl(var(--chart-1))"
-                                                        onMouseOver={(e) =>
-                                                            e.currentTarget.setAttribute("fill", "hsl(var(--chart-2))")
-                                                        }
-                                                        onMouseOut={(e) =>
-                                                            e.currentTarget.setAttribute(
-                                                                "fill",
-                                                                "hsl(var(--chart-1))"
-                                                            )
-                                                        }
-                                                    />
-                                                ))}
-                                            </Bar>
-                                        </BarChart>
+                                    {/* Chart responsivo => 28 días */}
+                                    <div className="w-full mb-4">
+                                        <ResponsiveContainer width="100%" height={320}>
+                                            <BarChart data={stats28.dailyStats}>
+                                                <CartesianGrid stroke="none"/>
+                                                <XAxis
+                                                    dataKey="date"
+                                                    tickFormatter={(val) => {
+                                                        const d = new Date(val);
+                                                        return d.toLocaleDateString("es-ES", {
+                                                            month: "short",
+                                                            day: "numeric",
+                                                        });
+                                                    }}
+                                                />
+                                                <YAxis/>
+                                                <RechartsTooltip
+                                                    content={<CustomTooltip/>}
+                                                    cursor={{fill: "gray", fillOpacity: 0.5}}
+                                                />
+                                                <Bar dataKey="count">
+                                                    {/* Mapeamos para hover gris */}
+                                                    {stats28.dailyStats.map((entry, index) => (
+                                                        <Cell
+                                                            key={`cell-${index}`}
+                                                            fill="hsl(var(--chart-1))"
+                                                            onMouseOver={(e) =>
+                                                                e.currentTarget.setAttribute(
+                                                                    "fill",
+                                                                    "hsl(var(--chart-2))"
+                                                                )
+                                                            }
+                                                            onMouseOut={(e) =>
+                                                                e.currentTarget.setAttribute(
+                                                                    "fill",
+                                                                    "hsl(var(--chart-1))"
+                                                                )
+                                                            }
+                                                        />
+                                                    ))}
+                                                </Bar>
+                                            </BarChart>
+                                        </ResponsiveContainer>
                                     </div>
 
                                     {/* 4 columnas para países */}
@@ -803,13 +843,10 @@ export default function MultiSectionsItem({
                                                     </div>
                                                 ))}
                                         </div>
-
                                     </div>
                                 </>
                             ) : (
-                                <p className="text-sm text-gray-200">
-                                    No se han cargado datos.
-                                </p>
+                                <p className="text-sm text-gray-200">No se han cargado datos.</p>
                             )}
                         </CardContent>
                     </Card>
