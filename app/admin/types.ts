@@ -16,6 +16,7 @@ export interface LinkData {
     visible: boolean;
     position: number;
     section_id?: string | null;
+    url_link_id?: number | null;
 }
 
 export interface SectionData {
