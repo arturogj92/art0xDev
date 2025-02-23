@@ -18,6 +18,11 @@ interface DailyStat {
     countries: Record<string, number>;
 }
 
+interface Payload {
+    value: string,
+    length: number,
+}
+
 interface StatsData {
     selected: number;
     global: number;
@@ -265,6 +270,7 @@ function getFileNameFromUrl(url: string): string | null {
     }
 }
 
+
 // Tooltip Recharts
 function CustomTooltip({
                            active,
@@ -272,7 +278,7 @@ function CustomTooltip({
                            label,
                        }: {
     active?: boolean;
-    payload?: any[];
+    payload?: Payload[];
     label?: string;
 }) {
     if (active && payload && payload.length) {
@@ -553,7 +559,6 @@ export default function MultiSectionsItem({
             rounded-full
             w-12 h-6
             flex items-center justify-center
-            bg-gray-700
             hover:bg-purple-900
           "
                     pressed={link.visible}
