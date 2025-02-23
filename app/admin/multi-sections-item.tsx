@@ -7,6 +7,22 @@ import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {Toggle} from "@/components/ui/toggle";
 import {LinkData} from "./types";
+import {NextResponse} from "next/server";
+
+interface DailyStat {
+    date: string;
+    count: number;
+    countries: Record<string, number>;
+}
+
+interface StatsData {
+    selected: number;
+    global: number;
+    variation: number;
+    dailyStats: DailyStat[];
+    byCountry: Record<string, number>;
+}
+
 
 /** Iconos */
 function HandleIcon() {
@@ -192,7 +208,7 @@ export default function MultiSectionsItem({
 
     // NUEVO: Estados para el modal de estadísticas
     const [statsModalOpen, setStatsModalOpen] = useState(false);
-    const [statsData, setStatsData] = useState<any>(null);
+    const [statsData, setStatsData] = useState<StatsData | null>(null);
     const [loadingStats, setLoadingStats] = useState(false);
     const [statsError, setStatsError] = useState<string | null>(null);
 
@@ -301,7 +317,7 @@ export default function MultiSectionsItem({
         setStatsModalOpen(true);
 
         try {
-            const res = await fetch(`https://art0x.link/api/url/visitStats?url_id=${link.url_link_id}&range=7d`, {
+            const res = await fetch(`https://www.art0x.link/api/url/visitStats?url_id=${link.url_link_id}&range=7d`, {
                 method: "GET",
                 // mode: "cors", // opcional
                 headers: {
@@ -314,8 +330,12 @@ export default function MultiSectionsItem({
             }
             const data = await res.json();
             setStatsData(data.stats);
-        } catch (err: any) {
-            setStatsError(err.message || "Error desconocido");
+        } catch (err: unknown) {
+            const errorObj = err instanceof Error ? err : new Error("Unknown error");
+            return NextResponse.json(
+                {message: 'Error en el servidor', error: errorObj.message},
+                {status: 500}
+            );
         } finally {
             setLoadingStats(false);
         }
@@ -548,7 +568,7 @@ export default function MultiSectionsItem({
                                 {/* Podrías mostrar un map de dailyStats */}
                                 <div className="mt-2 border-t border-gray-600 pt-2">
                                     <p className="font-semibold">Desglose por día:</p>
-                                    {statsData.dailyStats.map((day: any) => (
+                                    {statsData.dailyStats.map((day: DailyStat) => (
                                         <div key={day.date}>
                                             <span className="font-mono text-xs">
                                                 {day.date}
